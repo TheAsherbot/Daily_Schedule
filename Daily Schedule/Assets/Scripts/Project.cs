@@ -34,4 +34,22 @@ public struct Project
     }
 
 
+    public static Project Load(DailySchedule dailySchedule)
+    {
+        return new Project("", dailySchedule);
+    }
+    public void Save()
+    {
+
+    }
+
+
+    public struct SaveData
+    {
+        public string name;
+        public ProjectState state;
+    }
+
+
+
 }

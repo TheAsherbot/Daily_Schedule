@@ -75,3 +75,22 @@
     margin-bottom: 1px;
     margin-left: 10px;
 }
+
+.schedule-label-style {
+    height: 100%;
+    margin-top: 0;
+    margin-right: 5px;
+    margin-bottom: 0;
+    margin-left: 5px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    font-size: 32px;
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+}

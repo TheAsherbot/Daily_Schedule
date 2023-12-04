@@ -16,19 +16,50 @@ public class DailySchedule : MonoBehaviour
 
 
 
+    private int i;
+
 
 
     private void Awake()
     {
-        Debug.Log($"DateTime.Today.Day: {DateTime.Today.Day}");
-        Debug.Log($"DateTime.Today.DayOfWeek: {DateTime.Today.DayOfWeek}");
-        Debug.Log($"DateTime.Today.DayOfYear: {DateTime.Today.DayOfYear}");
-        Debug.Log($"DateTime.Today.Month: {DateTime.Today.Month}");
-        Debug.Log($"DateTime.Today.Year: {DateTime.Today.Year}");
-
         if (!TryLoad())
         {
             projectList = new List<Project>();
+        }
+
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            i = 1;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            i = 2;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            i = 3;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            i = 4;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            i = 5;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            i = 6;
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            GetProject(i);
         }
     }
 
@@ -41,27 +72,60 @@ public class DailySchedule : MonoBehaviour
     private Project GetProject(int projectNumber)
     {
         int month = DateTime.Today.Day;
-        int dayOfTheWeek = DateTime.Today.DayOfWeek;
+        int dayOfTheWeek;
+        switch (DateTime.Today.DayOfWeek.ToString())
+        {
+            default:
+            case "Sunday":
+                dayOfTheWeek = 1;
+                    break;
+            case "Monday":
+                dayOfTheWeek = 2;
+                break;
+            case "Tuesday":
+                dayOfTheWeek = 3;
+                break;
+            case "Wednesday":
+                dayOfTheWeek = 4;
+                break;
+            case "Thursday":
+                dayOfTheWeek = 5;
+                break;
+            case "Friday":
+                dayOfTheWeek = 6;
+                break;
+            case "Saturday":
+                dayOfTheWeek = 7;
+                break;
+        }
         int dayOfTheMonth = DateTime.Today.Month;
         int DayOfTheYear = DateTime.Today.DayOfYear;
         int Year = DateTime.Today.Year;
+
+        int i;
         switch (projectNumber)
         {
             case 1:
-
-                break;
+                i = month + dayOfTheWeek + dayOfTheMonth + DayOfTheYear + Year;
+                return projectList[i % projectList.Count];
             case 2:
-                break;
+                i = month * dayOfTheWeek + dayOfTheMonth % DayOfTheYear + Year;
+                return projectList[i % projectList.Count];
             case 3:
-                break;
+                i = month - dayOfTheWeek * dayOfTheMonth + DayOfTheYear + Year;
+                return projectList[i % projectList.Count];
             case 4:
-                break;
+                i = month + dayOfTheWeek % dayOfTheMonth * DayOfTheYear + Year;
+                return projectList[i % projectList.Count];
             case 5:
-                break;
+                i = month + dayOfTheWeek - dayOfTheMonth + DayOfTheYear + Year;
+                return projectList[i % projectList.Count];
             case 6:
-                break;
-            default: 
-                break;
+                i = month * dayOfTheWeek - dayOfTheMonth % DayOfTheYear + Year;
+                return projectList[i % projectList.Count];
+            default:
+                i = month - dayOfTheWeek + dayOfTheMonth - DayOfTheYear + Year;
+                return projectList[i % projectList.Count];
         }
     }
 

@@ -67,6 +67,7 @@ public class DailyScheduleUI : MonoBehaviour
     {
         RemoveProject(index);
     }
+    
     private void DailySchedule_onProjectQuit(Project project, int index)
     {
         RemoveProject(index);
