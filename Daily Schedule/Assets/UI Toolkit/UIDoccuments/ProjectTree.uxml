@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/Unity%20Style%20Sheets/Schedule.uss?fileID=7433441132597879392&amp;guid=6b0930b178c9a2d43a54483e90c846ee&amp;type=3#Schedule" />
+    <ui:VisualElement name="project" style="flex-direction: row; width: 100%; height: 50px;">
+        <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="project-name-label" style="height: 50px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 2px; margin-right: 2px; margin-bottom: 2px; margin-left: 2px; flex-grow: 1; flex-shrink: 1; font-size: 35px;" />
+        <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="finish-button" class="finish-button-style button-style" />
+        <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="quit-button" class="quit-button-style button-style" />
+    </ui:VisualElement>
+</ui:UXML>

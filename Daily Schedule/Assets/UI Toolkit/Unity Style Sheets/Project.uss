@@ -1,0 +1,36 @@
+.button-style {
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    margin-top: 2px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    margin-left: 2px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    height: 50px;
+    width: 25%;
+}
+
+.finish-button-style {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url('project://database/Assets/Sprites/Checkmark.png?fileID=21300000&guid=75248e401a7bc374d83d00ec75c622e0&type=3#Checkmark');
+    -unity-background-image-tint-color: rgb(63, 207, 88);
+}
+
+.quit-button-style {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: url('project://database/Assets/Sprites/Cross.png?fileID=21300000&guid=98a659083176fe24bb1342c9bc8ca613&type=3#Cross');
+    -unity-background-image-tint-color: rgb(236, 73, 54);
+}
