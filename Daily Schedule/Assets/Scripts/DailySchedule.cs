@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using TheAshBot;
 
@@ -9,6 +10,10 @@ using UnityEngine;
 
 public class DailySchedule : MonoBehaviour
 {
+
+    private const string PROJECT_SAVE_DATA_NAME = "ProjectSaveData";
+    private const string FINISHED_PROJECT_SAVE_DATA_NAME = "FinishedProjectSaveData";
+    private const string QUIT_PROJECT_SAVE_DATA_NAME = "QuitProjectSaveData";
 
 
     public event Action<Project> onNewProjectAdded;
@@ -56,6 +61,7 @@ public class DailySchedule : MonoBehaviour
             int index = projectList.IndexOf(project);
             projectList.Remove(project);
             onProjectFinished?.Invoke(project, index);
+            AddToFinishedProjects(project);
         }
     }
     public void QuitProject(Project project)
@@ -65,31 +71,13 @@ public class DailySchedule : MonoBehaviour
             int index = projectList.IndexOf(project);
             projectList.Remove(project);
             onProjectQuit?.Invoke(project, index);
+            AddToQuitProjects(project);
         }
     }
 
 
-    public void Save()
-    {/*
-        string json =
-            "{\n" +
-            "    \"projectArray\": \n" +
-            "    [\n";
-        for (int i = 0; i < projectList.Count; i++)
-        {
-            json += projectList[i].Save();
-            if (i != (projectList.Count - 1))
-            {
-                json += ',';
-            }
-            json += '\n';
-        }
-        json += 
-            "    ]\n" +
-            "}";
-
-        SaveSystem.SaveString(json, SaveSystem.RootPath.Resources, "Saves", "ProjectSaveData", SaveSystem.FileType.Json, true); */
-
+    private void Save()
+    {
         SaveData saveData = new SaveData();
 
         saveData.projectArray = new Project.SaveData[projectList.Count];
@@ -98,12 +86,12 @@ public class DailySchedule : MonoBehaviour
             saveData.projectArray[i] = projectList[i].Save();
         }
 
-        SaveProjects("ProjectSaveData", saveData);
+        SaveProjects(PROJECT_SAVE_DATA_NAME, saveData);
     }
 
-    public bool TryLoad() 
+    private bool TryLoad() 
     {
-        bool isFileLoaded = TryLoadProjects("ProjectSaveData", out SaveData saveData);
+        bool isFileLoaded = TryLoadProjects(PROJECT_SAVE_DATA_NAME, out SaveData saveData);
 
         if (!isFileLoaded)
         {
@@ -118,6 +106,33 @@ public class DailySchedule : MonoBehaviour
 
         return true;
     }
+
+    private void AddToFinishedProjects(Project project)
+    {
+        AddProjectToFile(FINISHED_PROJECT_SAVE_DATA_NAME, project.Save());
+    }
+
+    private void AddToQuitProjects(Project project)
+    {
+        AddProjectToFile(QUIT_PROJECT_SAVE_DATA_NAME, project.Save());
+    }
+
+    private void AddProjectToFile(string fileName, Project.SaveData project)
+    {
+        bool isFileLoaded = TryLoadProjects(fileName, out SaveData saveData);
+
+        if (!isFileLoaded)
+        {
+            return;
+        }
+
+        List<Project.SaveData> finishedProjectList = saveData.projectArray.ToList();
+        finishedProjectList.Add(project);
+        saveData.projectArray = finishedProjectList.ToArray();
+
+        SaveProjects(fileName, saveData);;
+    }
+
 
     private bool TryLoadProjects(string fileName, out SaveData saveData)
     {
@@ -136,30 +151,10 @@ public class DailySchedule : MonoBehaviour
     }
     
     private void SaveProjects(string fileName, SaveData saveData)
-    {/*
-        string json =
-            "{\n" +
-            "    \"projectArray\": \n" +
-            "    [\n";
-        for (int i = 0; i < projectList.Count; i++)
-        {
-            json += projectList[i].Save();
-            if (i != (projectList.Count - 1))
-            {
-                json += ',';
-            }
-            json += '\n';
-        }
-        json +=
-            "    ]\n" +
-            "}";
-*/
-
+    {
         string json = JsonUtility.ToJson(saveData);
 
-        this.Log(json);
-
-        SaveSystem.SaveString(json, SaveSystem.RootPath.Resources, "Saves", "ProjectSaveData", SaveSystem.FileType.Json, true);
+        SaveSystem.SaveString(json, SaveSystem.RootPath.Resources, "Saves", fileName, SaveSystem.FileType.Json, true);
     }
 
 

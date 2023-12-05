@@ -176,6 +176,11 @@ namespace TheAshBot
             // loading the JSON as a string
             string json = LoadString(savePathRoot, path, name, FileType.Json);
 
+            if (json == null || json == "")
+            {
+                return default;
+            }
+
             // Converting the JSON to a save object
             return JsonUtility.FromJson<TSaveObject>(json);
         }
