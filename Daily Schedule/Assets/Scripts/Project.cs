@@ -1,3 +1,7 @@
+using System;
+
+using UnityEngine;
+
 [System.Serializable]
 public struct Project
 {
@@ -14,6 +18,12 @@ public struct Project
     {
         this.name = name;
         state = ProjectState.InProgress;
+        this.dailySchedule = dailySchedule;
+    }
+    public Project(string name, ProjectState state, DailySchedule dailySchedule)
+    {
+        this.name = name;
+        this.state = state;
         this.dailySchedule = dailySchedule;
     }
 
@@ -34,22 +44,35 @@ public struct Project
     }
 
 
-    public static Project Load(DailySchedule dailySchedule)
+    public static Project Load(string json, DailySchedule dailySchedule)
     {
-        return new Project("", dailySchedule);
+        SaveData saveData = JsonUtility.FromJson<SaveData>(json);
+        return new Project(saveData.name, saveData.state, dailySchedule);
     }
-    public void Save()
+    public static Project Load(SaveData saveData, DailySchedule dailySchedule)
     {
+        return new Project(saveData.name, saveData.state, dailySchedule);
+    }
 
+    public SaveData Save()
+    {
+        return new SaveData { name = name, state = state };
+    }
+
+    public override string ToString()
+    {
+        return
+            "        {\n" +
+            "            \"name\": \"" + name + "\",\n" +
+            "            \"state\": " + ((int)state) + "\n" +
+            "        }";
     }
 
 
+    [Serializable]
     public struct SaveData
     {
         public string name;
         public ProjectState state;
     }
-
-
-
 }

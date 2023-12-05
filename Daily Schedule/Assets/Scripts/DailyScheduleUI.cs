@@ -10,6 +10,9 @@ public class DailyScheduleUI : MonoBehaviour
     private TextField projectNameTextField;
     private Button addNewProjectButton;
 
+    [SerializeField] private bool isProjectNameTextFieldFocused;
+
+
     [SerializeField] private VisualTreeAsset projectTree;
     [SerializeField] private VisualTreeAsset scheduleTree;
 
@@ -21,7 +24,7 @@ public class DailyScheduleUI : MonoBehaviour
 
     
 
-    private void Start()
+    private void Awake()
     {
         root = GetComponent<UIDocument>().rootVisualElement;
 
@@ -30,13 +33,38 @@ public class DailyScheduleUI : MonoBehaviour
         projectNameTextField = root.Q<TextField>("project-name-text-field");
         addNewProjectButton = root.Q<Button>("add-new-project-button");
 
-        addNewProjectButton.clicked += AddNewProjectButton_clicked;
+        projectNameTextField.RegisterCallback<FocusInEvent>(projectNameTextField_OnFocus);
+        projectNameTextField.RegisterCallback<FocusOutEvent>(projectNameTextField_OnUnfocus);
 
+
+        addNewProjectButton.clicked += AddNewProjectButton_clicked;
 
         dailySchedule.onNewProjectAdded += DailySchedule_onNewProjectAdded;
         dailySchedule.onProjectFinished += DailySchedule_onProjectFinished;
         dailySchedule.onProjectQuit += DailySchedule_onProjectQuit;
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            if (isProjectNameTextFieldFocused)
+            {
+                AddProject();
+            }
+        }
+    }
+
+
+    private void projectNameTextField_OnFocus(FocusInEvent evt)
+    {
+        isProjectNameTextFieldFocused = true;
+    }
+    private void projectNameTextField_OnUnfocus(FocusOutEvent evt)
+    {
+        isProjectNameTextFieldFocused = false;
+    }
+
 
 
     private void AddNewProjectButton_clicked()
@@ -50,8 +78,6 @@ public class DailyScheduleUI : MonoBehaviour
         dailySchedule.AddNewProject(project);
         projectNameTextField.value = "";
     }
-
-
 
     private void DailySchedule_onNewProjectAdded(Project project)
     {
@@ -73,6 +99,19 @@ public class DailyScheduleUI : MonoBehaviour
         RemoveProject(index);
     }
 
+
+
+    private void AddProject()
+    {
+        if (projectNameTextField.value == "" || projectNameTextField.value == "null" || projectNameTextField.value == null)
+        {
+            return;
+        }
+
+        Project project = new Project(projectNameTextField.value, dailySchedule);
+        dailySchedule.AddNewProject(project);
+        projectNameTextField.value = "";
+    }
 
     private void RemoveProject(int index)
     {

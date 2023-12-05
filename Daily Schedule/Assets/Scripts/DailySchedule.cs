@@ -1,5 +1,10 @@
 using System;
 using System.Collections.Generic;
+
+using TheAshBot;
+
+using Unity.VisualScripting;
+
 using UnityEngine;
 
 public class DailySchedule : MonoBehaviour
@@ -16,50 +21,18 @@ public class DailySchedule : MonoBehaviour
 
 
 
-    private int i;
-
-
-
-    private void Awake()
+    private void Start()
     {
-        if (!TryLoad())
-        {
-            projectList = new List<Project>();
-        }
-
+        projectList = new List<Project>();
+        TryLoad();
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            i = 1;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            i = 2;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            i = 3;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            i = 4;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            i = 5;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha6))
-        {
-            i = 6;
-        }
-
-
         if (Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            GetProject(i);
+            GetProject(1);
+            Save();
         }
     }
 
@@ -67,6 +40,128 @@ public class DailySchedule : MonoBehaviour
     {
         Save();
     }
+
+
+    public void AddNewProject(Project project)
+    {
+        if (projectList.Contains(project)) return;
+
+        projectList.Add(project);
+        onNewProjectAdded?.Invoke(project);
+    }
+    public void FinishProject(Project project)
+    {
+        if (projectList.Contains(project))
+        {
+            int index = projectList.IndexOf(project);
+            projectList.Remove(project);
+            onProjectFinished?.Invoke(project, index);
+        }
+    }
+    public void QuitProject(Project project)
+    {
+        if (projectList.Contains(project))
+        {
+            int index = projectList.IndexOf(project);
+            projectList.Remove(project);
+            onProjectQuit?.Invoke(project, index);
+        }
+    }
+
+
+    public void Save()
+    {/*
+        string json =
+            "{\n" +
+            "    \"projectArray\": \n" +
+            "    [\n";
+        for (int i = 0; i < projectList.Count; i++)
+        {
+            json += projectList[i].Save();
+            if (i != (projectList.Count - 1))
+            {
+                json += ',';
+            }
+            json += '\n';
+        }
+        json += 
+            "    ]\n" +
+            "}";
+
+        SaveSystem.SaveString(json, SaveSystem.RootPath.Resources, "Saves", "ProjectSaveData", SaveSystem.FileType.Json, true); */
+
+        SaveData saveData = new SaveData();
+
+        saveData.projectArray = new Project.SaveData[projectList.Count];
+        for (int i = 0; i < saveData.projectArray.Length; i++)
+        {
+            saveData.projectArray[i] = projectList[i].Save();
+        }
+
+        SaveProjects("ProjectSaveData", saveData);
+    }
+
+    public bool TryLoad() 
+    {
+        bool isFileLoaded = TryLoadProjects("ProjectSaveData", out SaveData saveData);
+
+        if (!isFileLoaded)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < saveData.projectArray.Length; i++)
+        {
+            projectList.Add(Project.Load(saveData.projectArray[i], this));
+            onNewProjectAdded(projectList[i]);
+        }
+
+        return true;
+    }
+
+    private bool TryLoadProjects(string fileName, out SaveData saveData)
+    {
+        saveData = SaveSystem.LoadJson<SaveData>(SaveSystem.RootPath.Resources, "Saves", fileName);
+
+        if (saveData.projectArray == null)
+        {
+            return false;
+        }
+        else if (saveData.projectArray.Length == 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+    
+    private void SaveProjects(string fileName, SaveData saveData)
+    {/*
+        string json =
+            "{\n" +
+            "    \"projectArray\": \n" +
+            "    [\n";
+        for (int i = 0; i < projectList.Count; i++)
+        {
+            json += projectList[i].Save();
+            if (i != (projectList.Count - 1))
+            {
+                json += ',';
+            }
+            json += '\n';
+        }
+        json +=
+            "    ]\n" +
+            "}";
+*/
+
+        string json = JsonUtility.ToJson(saveData);
+
+        this.Log(json);
+
+        SaveSystem.SaveString(json, SaveSystem.RootPath.Resources, "Saves", "ProjectSaveData", SaveSystem.FileType.Json, true);
+    }
+
 
 
     private Project GetProject(int projectNumber)
@@ -129,50 +224,43 @@ public class DailySchedule : MonoBehaviour
         }
     }
 
-
-    public void AddNewProject(Project project)
+    private void GetSchedule()
     {
-        if (projectList.Contains(project)) return;
 
-        projectList.Add(project);
-        onNewProjectAdded?.Invoke(project);
     }
-    public void FinishProject(Project project)
+
+
+    [Serializable]
+    public struct SaveData
     {
-        if (projectList.Contains(project))
+        public Project.SaveData[] projectArray;
+    }
+
+    [Serializable]
+    public struct Schedule
+    {
+
+        private DaySchedule[] SundaySchedule;
+        private DaySchedule[] MondaySchedule;
+        private DaySchedule[] TuesdaySchedule;
+        private DaySchedule[] WednesdaySchedule;
+        private DaySchedule[] ThursdaySchedule;
+        private DaySchedule[] FridaySchedule;
+        private DaySchedule[] SaturdaySchedule;
+
+        public struct DaySchedule
         {
-            int index = projectList.IndexOf(project);
-            projectList.Remove(project);
-            onProjectFinished?.Invoke(project, index);
+            public string name;
+
+            public TimeFrame[] timeFrames;
+
+            public struct TimeFrame
+            {
+
+            }
+            
         }
-    }
-    public void QuitProject(Project project)
-    {
-        if (projectList.Contains(project))
-        {
-            int index = projectList.IndexOf(project);
-            projectList.Remove(project);
-            onProjectQuit?.Invoke(project, index);
-        }
-    }
-
-
-    public void Save()
-    {
 
     }
-
-    public bool TryLoad() 
-    {
-        return false;
-    }
-
-
-    [System.Serializable]
-    public struct SavedData
-    {
-        private List<Project> projectList;
-    }
-
 
 }
