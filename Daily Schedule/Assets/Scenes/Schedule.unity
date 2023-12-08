@@ -448,7 +448,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectTree: {fileID: 9197481963319205126, guid: 344014d2c80327149b9a0843e2eb65db, type: 3}
-  scheduleTree: {fileID: 9197481963319205126, guid: 7613ebf21f297c646a2f295fac464546, type: 3}
+  scheduleTimeFrameTree: {fileID: 9197481963319205126, guid: 7613ebf21f297c646a2f295fac464546, type: 3}
+  isProjectNameTextFieldFocused: 0
   dailySchedule: {fileID: 516196575}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

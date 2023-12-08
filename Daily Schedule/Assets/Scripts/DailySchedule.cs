@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using TheAshBot;
-
-using Unity.VisualScripting;
 
 using UnityEngine;
 
@@ -14,22 +13,59 @@ public class DailySchedule : MonoBehaviour
     private const string PROJECT_SAVE_DATA_NAME = "ProjectSaveData";
     private const string FINISHED_PROJECT_SAVE_DATA_NAME = "FinishedProjectSaveData";
     private const string QUIT_PROJECT_SAVE_DATA_NAME = "QuitProjectSaveData";
+    private const string TODAYS_PROJECT_SAVE_DATA_NAME = "TodaysProjectSaveData";
 
 
     public event Action<Project> onNewProjectAdded;
     public event Action<Project, int> onProjectFinished;
     public event Action<Project, int> onProjectQuit;
 
+    public event Action<Schedule.DaySchedule> onCurrentScheduleChanged;
+
 
 
     private List<Project> projectList;
 
+    private Schedule schedules;
+    private List<Schedule.DaySchedule> todaysSchedules;
+    private Schedule.DaySchedule currentSchedule;
 
 
     private void Start()
     {
         projectList = new List<Project>();
         TryLoad();
+
+        schedules = LoadSchedules();
+
+        switch (DateTime.Today.DayOfWeek.ToString())
+        {
+            case "Sunday":
+                todaysSchedules = schedules.SundaySchedule.ToList();
+                break;
+            case "Monday":
+                todaysSchedules = schedules.MondaySchedule.ToList();
+                break;
+            case "Tuesday":
+                todaysSchedules = schedules.TuesdaySchedule.ToList();
+                break;
+            case "Wednesday":
+                todaysSchedules = schedules.WednesdaySchedule.ToList();
+                break;
+            case "Thursday":
+                todaysSchedules = schedules.ThursdaySchedule.ToList();
+                break;
+            case "Friday":
+                todaysSchedules = schedules.FridaySchedule.ToList();
+                break;
+            case "Saturday":
+                todaysSchedules = schedules.SaturdaySchedule.ToList();
+                break;
+        }
+
+        currentSchedule = todaysSchedules[0];
+        PutProjectsIntoSchedule();
+        onCurrentScheduleChanged?.Invoke(currentSchedule);
     }
 
     private void Update()
@@ -59,7 +95,9 @@ public class DailySchedule : MonoBehaviour
         if (projectList.Contains(project))
         {
             int index = projectList.IndexOf(project);
+            string oldProjectName = projectList[index].name;
             projectList.Remove(project);
+            ShiftTodaysProjects(index, oldProjectName);
             onProjectFinished?.Invoke(project, index);
             AddToFinishedProjects(project);
         }
@@ -69,10 +107,39 @@ public class DailySchedule : MonoBehaviour
         if (projectList.Contains(project))
         {
             int index = projectList.IndexOf(project);
+            string oldProjectName = projectList[index].name;
             projectList.Remove(project);
+            ShiftTodaysProjects(index, oldProjectName);
             onProjectQuit?.Invoke(project, index);
             AddToQuitProjects(project);
         }
+    }
+
+    public void ChangeSchedule(int scheduleIndex)
+    {
+        if (scheduleIndex < todaysSchedules.Count)
+        {
+            currentSchedule = todaysSchedules[scheduleIndex];
+            onCurrentScheduleChanged?.Invoke(currentSchedule);
+        }
+    }
+
+    public Schedule GetSchedules()
+    {
+        return schedules;
+    }
+    public List<Schedule.DaySchedule> GetTodaysSchedules()
+    {
+        return todaysSchedules;
+    }
+    public Schedule.DaySchedule GetCurrentSchedule()
+    {
+        return currentSchedule;
+    }
+    public void SetCurrentSchedule(Schedule.DaySchedule daySchedule)
+    {
+        currentSchedule = daySchedule;
+        onCurrentScheduleChanged?.Invoke(currentSchedule);
     }
 
 
@@ -88,8 +155,7 @@ public class DailySchedule : MonoBehaviour
 
         SaveProjects(PROJECT_SAVE_DATA_NAME, saveData);
     }
-
-    private bool TryLoad() 
+    private bool TryLoad()
     {
         bool isFileLoaded = TryLoadProjects(PROJECT_SAVE_DATA_NAME, out SaveData saveData);
 
@@ -111,7 +177,6 @@ public class DailySchedule : MonoBehaviour
     {
         AddProjectToFile(FINISHED_PROJECT_SAVE_DATA_NAME, project.Save());
     }
-
     private void AddToQuitProjects(Project project)
     {
         AddProjectToFile(QUIT_PROJECT_SAVE_DATA_NAME, project.Save());
@@ -130,7 +195,7 @@ public class DailySchedule : MonoBehaviour
         finishedProjectList.Add(project);
         saveData.projectArray = finishedProjectList.ToArray();
 
-        SaveProjects(fileName, saveData);;
+        SaveProjects(fileName, saveData); ;
     }
 
 
@@ -149,7 +214,6 @@ public class DailySchedule : MonoBehaviour
 
         return true;
     }
-    
     private void SaveProjects(string fileName, SaveData saveData)
     {
         string json = JsonUtility.ToJson(saveData);
@@ -161,68 +225,97 @@ public class DailySchedule : MonoBehaviour
 
     private Project GetProject(int projectNumber)
     {
-        int month = DateTime.Today.Day;
-        int dayOfTheWeek;
-        switch (DateTime.Today.DayOfWeek.ToString())
-        {
-            default:
-            case "Sunday":
-                dayOfTheWeek = 1;
-                    break;
-            case "Monday":
-                dayOfTheWeek = 2;
-                break;
-            case "Tuesday":
-                dayOfTheWeek = 3;
-                break;
-            case "Wednesday":
-                dayOfTheWeek = 4;
-                break;
-            case "Thursday":
-                dayOfTheWeek = 5;
-                break;
-            case "Friday":
-                dayOfTheWeek = 6;
-                break;
-            case "Saturday":
-                dayOfTheWeek = 7;
-                break;
-        }
-        int dayOfTheMonth = DateTime.Today.Month;
-        int DayOfTheYear = DateTime.Today.DayOfYear;
-        int Year = DateTime.Today.Year;
+        TodaysProjects todaysProjects = SaveSystem.LoadJson<TodaysProjects>(SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME);
 
-        int i;
+        if (todaysProjects.date != DateTime.Today.Date.ToString())
+        {
+            // Change values
+
+            todaysProjects.date = DateTime.Today.Date.ToString();
+            todaysProjects.projectIndex0 = UnityEngine.Random.Range(0, projectList.Count);
+            todaysProjects.projectIndex1 = UnityEngine.Random.Range(0, projectList.Count);
+            todaysProjects.projectIndex2 = UnityEngine.Random.Range(0, projectList.Count);
+            todaysProjects.projectIndex3 = UnityEngine.Random.Range(0, projectList.Count);
+            todaysProjects.projectIndex4 = UnityEngine.Random.Range(0, projectList.Count);
+            todaysProjects.projectIndex5 = UnityEngine.Random.Range(0, projectList.Count);
+
+            SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME, true);
+
+        }
+
         switch (projectNumber)
         {
-            case 1:
-                i = month + dayOfTheWeek + dayOfTheMonth + DayOfTheYear + Year;
-                return projectList[i % projectList.Count];
-            case 2:
-                i = month * dayOfTheWeek + dayOfTheMonth % DayOfTheYear + Year;
-                return projectList[i % projectList.Count];
-            case 3:
-                i = month - dayOfTheWeek * dayOfTheMonth + DayOfTheYear + Year;
-                return projectList[i % projectList.Count];
-            case 4:
-                i = month + dayOfTheWeek % dayOfTheMonth * DayOfTheYear + Year;
-                return projectList[i % projectList.Count];
-            case 5:
-                i = month + dayOfTheWeek - dayOfTheMonth + DayOfTheYear + Year;
-                return projectList[i % projectList.Count];
-            case 6:
-                i = month * dayOfTheWeek - dayOfTheMonth % DayOfTheYear + Year;
-                return projectList[i % projectList.Count];
             default:
-                i = month - dayOfTheWeek + dayOfTheMonth - DayOfTheYear + Year;
-                return projectList[i % projectList.Count];
+            case 0:
+                return projectList[todaysProjects.projectIndex0];
+            case 1:
+                return projectList[todaysProjects.projectIndex1];
+            case 2:
+                return projectList[todaysProjects.projectIndex2];
+            case 3:
+                return projectList[todaysProjects.projectIndex3];
+            case 4:
+                return projectList[todaysProjects.projectIndex4];
+            case 5:
+                return projectList[todaysProjects.projectIndex5];
+        }
+    }
+    private void ShiftTodaysProjects(int removedProjectIndex, string oldProjectName)
+    {
+        TodaysProjects todaysProjects = SaveSystem.LoadJson<TodaysProjects>(SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME);
+
+        todaysProjects.date = DateTime.Today.Date.ToString();
+
+        ShiftIfNecessaire(ref todaysProjects.projectIndex0);
+        ShiftIfNecessaire(ref todaysProjects.projectIndex1);
+        ShiftIfNecessaire(ref todaysProjects.projectIndex2);
+        ShiftIfNecessaire(ref todaysProjects.projectIndex3);
+        ShiftIfNecessaire(ref todaysProjects.projectIndex4);
+        ShiftIfNecessaire(ref todaysProjects.projectIndex5);
+
+        SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME, true);
+
+        void ShiftIfNecessaire(ref int projectIndex)
+        {
+            if (projectIndex == removedProjectIndex)
+            {
+                projectIndex = UnityEngine.Random.Range(0, projectList.Count);
+                for (int i = 0; i < currentSchedule.TimeFrames.Length; i++)
+                {
+                    if (currentSchedule.TimeFrames[i].ProjectName == oldProjectName)
+                    {
+                        currentSchedule.TimeFrames[i].ProjectName = projectList[projectIndex].name;
+                    }
+                }
+            }
+            else if (projectIndex > removedProjectIndex)
+            {
+                projectIndex--;
+            }
         }
     }
 
-    private void GetSchedule()
+    private Schedule LoadSchedules()
     {
+        Schedule schedule = SaveSystem.LoadJson<Schedule>(SaveSystem.RootPath.Resources, "Saves", "ScheduleSaveData");
 
+        return schedule;
     }
+
+    private void PutProjectsIntoSchedule()
+    {
+        int j = 0;
+        for (int i = 0; i < currentSchedule.TimeFrames.Length; i++)
+        {
+            if (currentSchedule.TimeFrames[i].TimeFrameName.Contains("Project #"))
+            {
+                this.Log("GetProject(j).name: " + GetProject(j).name);
+                currentSchedule.TimeFrames[i].ProjectName = GetProject(j).name;
+                j++;
+            }
+        }
+    }
+
 
 
     [Serializable]
@@ -235,27 +328,54 @@ public class DailySchedule : MonoBehaviour
     public struct Schedule
     {
 
-        private DaySchedule[] SundaySchedule;
-        private DaySchedule[] MondaySchedule;
-        private DaySchedule[] TuesdaySchedule;
-        private DaySchedule[] WednesdaySchedule;
-        private DaySchedule[] ThursdaySchedule;
-        private DaySchedule[] FridaySchedule;
-        private DaySchedule[] SaturdaySchedule;
+        public DaySchedule[] SundaySchedule;
+        public DaySchedule[] MondaySchedule;
+        public DaySchedule[] TuesdaySchedule;
+        public DaySchedule[] WednesdaySchedule;
+        public DaySchedule[] ThursdaySchedule;
+        public DaySchedule[] FridaySchedule;
+        public DaySchedule[] SaturdaySchedule;
 
+        [Serializable]
         public struct DaySchedule
         {
             public string name;
 
-            public TimeFrame[] timeFrames;
+            public TimeFrame[] TimeFrames;
 
+            [Serializable]
             public struct TimeFrame
             {
-
+                public int StartTime;
+                public int EndTime;
+                public string TimeFrameName;
+                public string ProjectName;
             }
-            
+
         }
 
+
+        public override string ToString()
+        {
+            string json = JsonUtility.ToJson(this);
+            json = json.Replace("{", "{\n").
+                Replace("[", "[\n").
+                Replace(",", ",\n");
+            return json;
+        }
+    }
+
+    [Serializable]
+    public struct TodaysProjects
+    {
+        public string date;
+
+        public int projectIndex0;
+        public int projectIndex1;
+        public int projectIndex2;
+        public int projectIndex3;
+        public int projectIndex4;
+        public int projectIndex5;
     }
 
 }
