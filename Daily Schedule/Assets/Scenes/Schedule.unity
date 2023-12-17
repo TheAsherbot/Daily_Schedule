@@ -418,7 +418,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PanelSettings: {fileID: 11400000, guid: 782a721c8d879874f91637f0a07ffb5b, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: 0da51aa1976d41849835c5b83a17f544, type: 3}
+  sourceAsset: {fileID: 9197481963319205126, guid: 697e5a397d2852f4f9cd9d158e5bc419, type: 3}
   m_SortingOrder: 0
 --- !u!4 &989303539
 Transform:
@@ -449,7 +449,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectTree: {fileID: 9197481963319205126, guid: 344014d2c80327149b9a0843e2eb65db, type: 3}
   scheduleTimeFrameTree: {fileID: 9197481963319205126, guid: 7613ebf21f297c646a2f295fac464546, type: 3}
-  isProjectNameTextFieldFocused: 0
   dailySchedule: {fileID: 516196575}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

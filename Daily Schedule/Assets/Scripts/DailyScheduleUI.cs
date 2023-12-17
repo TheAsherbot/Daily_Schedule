@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using TheAshBot;
-
 using UnityEngine;
 using UnityEngine.UIElements;
 
-using static UnityEditor.Rendering.FilterWindow;
 
 public class DailyScheduleUI : MonoBehaviour
 {
@@ -78,6 +75,12 @@ public class DailyScheduleUI : MonoBehaviour
         dailySchedule.onCurrentScheduleChanged += DailySchedule_onCurrentScheduleChanged;
     }
 
+    private void Start()
+    {
+        TabbedMenuController tabbedMenuController = new TabbedMenuController(root);
+
+        tabbedMenuController.RegisterTabCallback();
+    }
 
     private void Update()
     {
@@ -188,7 +191,7 @@ public class DailyScheduleUI : MonoBehaviour
             }
             else
             {
-                timeFrame.Q<Label>("project-name-label").style.display = DisplayStyle.None;
+                timeFrame.Q<VisualElement>("bottom").style.display = DisplayStyle.None;
             }
 
 
@@ -212,5 +215,7 @@ public class DailyScheduleUI : MonoBehaviour
     {
         projectsScrollView.RemoveAt(index);
     }
+
+
 
 }

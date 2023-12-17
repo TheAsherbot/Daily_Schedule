@@ -94,6 +94,34 @@
     -unity-background-image-tint-color: rgb(152, 47, 35);
 }
 
+.image-button-style {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.image-button-style:hover {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    -unity-background-image-tint-color: rgb(217, 217, 217);
+}
+
+.image-button-style:active {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0);
+    background-image: none;
+    -unity-background-image-tint-color: rgb(166, 166, 166);
+}
+
 .toolbar-visual-element-style {
     min-height: 20px;
     max-height: 10%;
@@ -142,4 +170,38 @@
     font-size: 24px;
     -unity-text-align: middle-left;
     -unity-font-style: bold;
+}
+
+.Tab {
+    flex-grow: 1;
+    font-size: 30px;
+    background-color: rgb(165, 165, 165);
+}
+
+.CurrentlySelectedTab {
+    background-color: rgb(140, 140, 140);
+}
+
+.Content {
+    height: 100%;
+    width: 100%;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.UnselectedContent {
+    display: none;
+}
+
+#Tabs {
+    margin-top: 5px;
+    margin-right: 10px;
+    margin-bottom: 0;
+    margin-left: 10px;
 }

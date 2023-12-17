@@ -5,6 +5,8 @@ using System.Linq;
 
 using TheAshBot;
 
+using Unity.VisualScripting;
+
 using UnityEngine;
 
 public class DailySchedule : MonoBehaviour
@@ -77,10 +79,6 @@ public class DailySchedule : MonoBehaviour
         }
     }
 
-    private void OnApplicationQuit()
-    {
-        Save();
-    }
 
 
     public void AddNewProject(Project project)
@@ -89,6 +87,7 @@ public class DailySchedule : MonoBehaviour
 
         projectList.Add(project);
         onNewProjectAdded?.Invoke(project);
+        Save();
     }
     public void FinishProject(Project project)
     {
@@ -100,6 +99,7 @@ public class DailySchedule : MonoBehaviour
             ShiftTodaysProjects(index, oldProjectName);
             onProjectFinished?.Invoke(project, index);
             AddToFinishedProjects(project);
+            Save();
         }
     }
     public void QuitProject(Project project)
@@ -112,6 +112,7 @@ public class DailySchedule : MonoBehaviour
             ShiftTodaysProjects(index, oldProjectName);
             onProjectQuit?.Invoke(project, index);
             AddToQuitProjects(project);
+            Save();
         }
     }
 
@@ -142,6 +143,21 @@ public class DailySchedule : MonoBehaviour
         onCurrentScheduleChanged?.Invoke(currentSchedule);
     }
 
+    public void RerollTimeFrame(int timeFrame)
+    {
+        TodaysProjects todaysProjects = SaveSystem.LoadJson<TodaysProjects>(SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME);
+
+
+        if (currentSchedule.TimeFrames[timeFrame].ProjectName == projectList[todaysProjects.projectIndex0].name)
+        {
+
+        }
+        else if (currentSchedule.TimeFrames[timeFrame].ProjectName == projectList[todaysProjects.projectIndex0].name)
+        {
+
+        }
+            
+    }
 
     private void Save()
     {

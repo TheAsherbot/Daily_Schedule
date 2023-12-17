@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/Unity%20Style%20Sheets/Schedule.uss?fileID=7433441132597879392&amp;guid=6b0930b178c9a2d43a54483e90c846ee&amp;type=3#Schedule" />
+    <ui:VisualElement name="Root" style="flex-grow: 1; flex-direction: column;">
+        <ui:VisualElement name="Tabs" style="flex-grow: 0; flex-direction: row;">
+            <ui:Label tabindex="-1" text="Projects" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ProjectTab" class="Tab CurrentlySelectedTab" />
+            <ui:Label tabindex="-1" text="Schedule" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ScheduleTab" class="Tab" />
+        </ui:VisualElement>
+        <ui:VisualElement name="Contents" style="flex-grow: 1;">
+            <ui:GroupBox name="ProjectContent" class="Content">
+                <ui:VisualElement name="toolbar-visual-element" class="toolbar-visual-element-style" style="margin-top: 10px; background-color: rgb(242, 242, 242); min-height: 50px; flex-direction: row;">
+                    <ui:TextField picking-mode="Ignore" value="Project Name" name="project-name-text-field" style="font-size: 22px; flex-grow: 1; max-width: initial; min-width: initial;" />
+                    <ui:Button text="Add New Project" parse-escape-sequences="true" display-tooltip-when-elided="true" name="add-new-project-button" class="button-style" style="font-size: 25px; flex-basis: initial;" />
+                </ui:VisualElement>
+                <ui:ScrollView name="projects-scroll-view" class="scroll-view-style" style="margin-top: 1px;" />
+            </ui:GroupBox>
+            <ui:GroupBox name="ScheduleContent" class="Content UnselectedContent">
+                <ui:VisualElement name="toolbar-visual-element" class="toolbar-visual-element-style" style="margin-top: 10px; background-color: rgb(242, 242, 242); min-height: 50px; flex-direction: row;">
+                    <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="day-of-the-week" class="schedule-label-style" />
+                    <ui:DropdownField index="-1" choices="System.Collections.Generic.List`1[System.String]" name="schedule-drop-down-field" class="drop-down-field-style" />
+                </ui:VisualElement>
+                <ui:ScrollView name="schedule-scroll-view" class="scroll-view-style" style="margin-top: 0;" />
+            </ui:GroupBox>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
