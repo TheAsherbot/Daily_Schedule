@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 using TheAshBot;
 
-using Unity.VisualScripting;
-
 using UnityEngine;
+
+using static DailySchedule.Schedule.DaySchedule;
 
 public class DailySchedule : MonoBehaviour
 {
@@ -32,6 +31,11 @@ public class DailySchedule : MonoBehaviour
     private List<Schedule.DaySchedule> todaysSchedules;
     private Schedule.DaySchedule currentSchedule;
 
+
+    private void Awake()
+    {
+        onCurrentScheduleChanged += PutProjectsIntoSchedule;
+    }
 
     private void Start()
     {
@@ -66,7 +70,6 @@ public class DailySchedule : MonoBehaviour
         }
 
         currentSchedule = todaysSchedules[0];
-        PutProjectsIntoSchedule();
         onCurrentScheduleChanged?.Invoke(currentSchedule);
     }
 
@@ -147,16 +150,46 @@ public class DailySchedule : MonoBehaviour
     {
         TodaysProjects todaysProjects = SaveSystem.LoadJson<TodaysProjects>(SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME);
 
-
-        if (currentSchedule.TimeFrames[timeFrame].ProjectName == projectList[todaysProjects.projectIndex0].name)
+        if (currentSchedule.TimeFrames[timeFrame].TimeFrameName.Contains("Project #"))
         {
-
+            int projectNumber = 0;
+            for (int i = 0; i < currentSchedule.TimeFrames.Length; i++)
+            {
+                if (currentSchedule.TimeFrames[i].TimeFrameName.Contains("Project #"))
+                {
+                    if (i == timeFrame)
+                    {
+                        switch (projectNumber)
+                        {
+                            case 0:
+                                todaysProjects.projectIndex0 = UnityEngine.Random.Range(0, projectList.Count);
+                                break;
+                            case 1:
+                                todaysProjects.projectIndex1 = UnityEngine.Random.Range(0, projectList.Count);
+                                break;
+                            case 2:
+                                todaysProjects.projectIndex2 = UnityEngine.Random.Range(0, projectList.Count);
+                                break;
+                            case 3:
+                                todaysProjects.projectIndex3 = UnityEngine.Random.Range(0, projectList.Count);
+                                break;
+                            case 4:
+                                todaysProjects.projectIndex4 = UnityEngine.Random.Range(0, projectList.Count);
+                                break;
+                            case 5:
+                                todaysProjects.projectIndex5 = UnityEngine.Random.Range(0, projectList.Count);
+                                break;
+                        }
+                        break;
+                    }
+                    projectNumber++;
+                }
+            }
         }
-        else if (currentSchedule.TimeFrames[timeFrame].ProjectName == projectList[todaysProjects.projectIndex0].name)
-        {
 
-        }
-            
+        SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME, true);
+
+        onCurrentScheduleChanged?.Invoke(currentSchedule);
     }
 
     private void Save()
@@ -256,7 +289,6 @@ public class DailySchedule : MonoBehaviour
             todaysProjects.projectIndex5 = UnityEngine.Random.Range(0, projectList.Count);
 
             SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME, true);
-
         }
 
         switch (projectNumber)
@@ -318,14 +350,13 @@ public class DailySchedule : MonoBehaviour
         return schedule;
     }
 
-    private void PutProjectsIntoSchedule()
+    private void PutProjectsIntoSchedule(Schedule.DaySchedule currentSchedule)
     {
         int j = 0;
         for (int i = 0; i < currentSchedule.TimeFrames.Length; i++)
         {
             if (currentSchedule.TimeFrames[i].TimeFrameName.Contains("Project #"))
             {
-                this.Log("GetProject(j).name: " + GetProject(j).name);
                 currentSchedule.TimeFrames[i].ProjectName = GetProject(j).name;
                 j++;
             }
@@ -366,6 +397,40 @@ public class DailySchedule : MonoBehaviour
                 public int EndTime;
                 public string TimeFrameName;
                 public string ProjectName;
+
+
+
+                public static bool operator ==(TimeFrame timeFrame1, TimeFrame timeFrame2)
+                {
+                    if (timeFrame1.StartTime == timeFrame2.StartTime && timeFrame1.EndTime == timeFrame2.EndTime && timeFrame1.TimeFrameName == timeFrame2.TimeFrameName && timeFrame1.ProjectName == timeFrame2.ProjectName)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+                public static bool operator !=(TimeFrame timeFrame1, TimeFrame timeFrame2)
+                {
+                    if (timeFrame1.StartTime == timeFrame2.StartTime && timeFrame1.EndTime == timeFrame2.EndTime && timeFrame1.TimeFrameName == timeFrame2.TimeFrameName && timeFrame1.ProjectName == timeFrame2.ProjectName)
+                    {
+                        return false;
+                    }
+                    return true;
+                }
+
+                public override bool Equals(object obj)
+                {
+                    if (!(obj is TimeFrame timeFrame))
+                    {
+                        return false;
+                    }
+
+                    if (timeFrame.StartTime == StartTime && timeFrame.EndTime == EndTime && timeFrame.TimeFrameName == TimeFrameName && timeFrame.ProjectName == ProjectName)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }
             }
 
         }

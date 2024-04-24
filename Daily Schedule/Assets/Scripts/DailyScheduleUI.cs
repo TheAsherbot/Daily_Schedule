@@ -71,7 +71,10 @@ public class DailyScheduleUI : MonoBehaviour
         dailySchedule.onNewProjectAdded += DailySchedule_onNewProjectAdded;
         dailySchedule.onProjectFinished += DailySchedule_onProjectFinished;
         dailySchedule.onProjectQuit += DailySchedule_onProjectQuit;
+    }
 
+    private void OnEnable()
+    {
         dailySchedule.onCurrentScheduleChanged += DailySchedule_onCurrentScheduleChanged;
     }
 
@@ -109,6 +112,8 @@ public class DailyScheduleUI : MonoBehaviour
     private void ScheduleDropDownField_OnValueChanged(ChangeEvent<string> eventCallback)
     {
         dailySchedule.SetCurrentSchedule(dailySchedule.GetTodaysSchedules()[scheduleDropDownField.choices.ToList().FindIndex((string value) => { return value == eventCallback.newValue; })]);
+        List<DailySchedule.Schedule.DaySchedule> todaysSchedules = dailySchedule.GetTodaysSchedules();
+        scheduleDropDownField.SetValueWithoutNotify(todaysSchedules[scheduleDropDownField.choices.ToList().FindIndex((string value) => { return value == eventCallback.newValue; })].name);
     }
 
     private void AddNewProjectButton_clicked()
@@ -180,22 +185,35 @@ public class DailyScheduleUI : MonoBehaviour
             string endTime = todaysSchedule.TimeFrames[i].EndTime.ToString();
             endTime = (endTime.Length == 3 ? ("" + endTime[0] + ':' + endTime[1] + endTime[2]) : ("" + endTime[0] + endTime[1] + ':' + endTime[2] + endTime[3]));
 
-
-            VisualElement timeFrame = scheduleTimeFrameTree.CloneTree();
-            timeFrame.Q<VisualElement>("schedule-time-frame").style.backgroundColor = i % 2 == 0 ? Color.HSVToRGB(0, 0, 0.65f) : Color.HSVToRGB(0, 0, 0.55f);
-            timeFrame.Q<Label>("time-frame-label").text = startTime + " - " + endTime;
-            timeFrame.Q<Label>("time-frame-name-label").text = todaysSchedule.TimeFrames[i].TimeFrameName;
+            VisualElement timeFrameVisualElement = scheduleTimeFrameTree.CloneTree();
+            timeFrameVisualElement.Q<VisualElement>("schedule-time-frame").style.backgroundColor = i % 2 == 0 ? Color.HSVToRGB(0, 0, 0.65f) : Color.HSVToRGB(0, 0, 0.55f);
+            timeFrameVisualElement.Q<Label>("time-frame-label").text = startTime + " - " + endTime;
+            timeFrameVisualElement.Q<Label>("time-frame-name-label").text = todaysSchedule.TimeFrames[i].TimeFrameName;
             if (todaysSchedule.TimeFrames[i].ProjectName != null && todaysSchedule.TimeFrames[i].ProjectName != " ")
             {
-                timeFrame.Q<Label>("project-name-label").text = todaysSchedule.TimeFrames[i].ProjectName;
+                timeFrameVisualElement.Q<Label>("project-name-label").text = todaysSchedule.TimeFrames[i].ProjectName;
             }
             else
             {
-                timeFrame.Q<VisualElement>("bottom").style.display = DisplayStyle.None;
+                timeFrameVisualElement.Q<VisualElement>("bottom").style.display = DisplayStyle.None;
             }
+            DailySchedule.Schedule.DaySchedule.TimeFrame timeFrame = todaysSchedule.TimeFrames[i];
+            timeFrameVisualElement.Q<Button>("reroll-button").clicked += () =>
+            {
+                int timeFrameNumber = 0;
+                for (int i = 0; i < todaysSchedule.TimeFrames.Length; i++)
+                {
+                    if (timeFrame == todaysSchedule.TimeFrames[i])
+                    {
+                        timeFrameNumber = i; 
+                        break;
+                    }
+                }
+                dailySchedule.RerollTimeFrame(timeFrameNumber);
+            };
 
 
-            scheduleScrollView.Add(timeFrame);
+            scheduleScrollView.Add(timeFrameVisualElement);
         }
     }
 

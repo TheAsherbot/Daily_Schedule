@@ -136,6 +136,71 @@
           "TimeFrameName": "Read coding books"
         }
       ]
+    },
+    {
+      "name": "Free",
+      "TimeFrames": [
+        {
+          "StartTime": 700,
+          "EndTime": 730,
+          "TimeFrameName": "Wake up, and read Bible"
+        },
+        {
+          "StartTime": 730,
+          "EndTime": 900,
+          "TimeFrameName": "Project #1"
+        },
+        {
+          "StartTime": 900,
+          "EndTime": 930,
+          "TimeFrameName": "Break #1"
+        },
+        {
+          "StartTime": 930,
+          "EndTime": 1130,
+          "TimeFrameName": "Project #2"
+        },
+        {
+          "StartTime": 1130,
+          "EndTime": 1230,
+          "TimeFrameName": "Launch and Break #2"
+        },
+        {
+          "StartTime": 1230,
+          "EndTime": 1430,
+          "TimeFrameName": "Project #3"
+        },
+        {
+          "StartTime": 1430,
+          "EndTime": 1500,
+          "TimeFrameName": "Break #3"
+        },
+        {
+          "StartTime": 1500,
+          "EndTime": 1700,
+          "TimeFrameName": "Project #4"
+        },
+        {
+          "StartTime": 1700,
+          "EndTime": 1730,
+          "TimeFrameName": "Break #4"
+        },
+        {
+          "StartTime": 1730,
+          "EndTime": 2030,
+          "TimeFrameName": "Project #5, and Dinner"
+        },
+        {
+          "StartTime": 2030,
+          "EndTime": 2100,
+          "TimeFrameName": "Brush teeth and get ready for bed"
+        },
+        {
+          "StartTime": 2100,
+          "EndTime": 2200,
+          "TimeFrameName": "Read coding books"
+        }
+      ]
     }
   ],
   "TuesdaySchedule": [
