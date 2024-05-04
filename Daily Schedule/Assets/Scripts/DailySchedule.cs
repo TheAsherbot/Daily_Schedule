@@ -5,13 +5,13 @@ using System.Linq;
 using TheAshBot;
 
 using UnityEngine;
-
-using static DailySchedule.Schedule.DaySchedule;
+using UnityEngine.Rendering;
 
 public class DailySchedule : MonoBehaviour
 {
 
     private const string PROJECT_SAVE_DATA_NAME = "ProjectSaveData";
+    private const string BREAK_SAVE_DATA_NAME = "BreakSaveData";
     private const string FINISHED_PROJECT_SAVE_DATA_NAME = "FinishedProjectSaveData";
     private const string QUIT_PROJECT_SAVE_DATA_NAME = "QuitProjectSaveData";
     private const string TODAYS_PROJECT_SAVE_DATA_NAME = "TodaysProjectSaveData";
@@ -21,11 +21,15 @@ public class DailySchedule : MonoBehaviour
     public event Action<Project, int> onProjectFinished;
     public event Action<Project, int> onProjectQuit;
 
+    public event Action<Break> onNewBreakAdded;
+    public event Action<Break, int> onBreakStopped;
+
     public event Action<Schedule.DaySchedule> onCurrentScheduleChanged;
 
 
 
     private List<Project> projectList;
+    private List<Break> breakList;
 
     private Schedule schedules;
     private List<Schedule.DaySchedule> todaysSchedules;
@@ -40,6 +44,7 @@ public class DailySchedule : MonoBehaviour
     private void Start()
     {
         projectList = new List<Project>();
+        breakList = new List<Break>();
         TryLoad();
 
         schedules = LoadSchedules();
@@ -119,6 +124,27 @@ public class DailySchedule : MonoBehaviour
         }
     }
 
+    public void AddNewBreak(Break _break)
+    {
+        if (breakList.Contains(_break)) return;
+
+        breakList.Add(_break);
+        onNewBreakAdded?.Invoke(_break);
+        Save();
+    }
+    public void StopBreak(Break _break)
+    {
+        if (breakList.Contains(_break))
+        {
+            int index = breakList.IndexOf(_break);
+            string oldProjectName = breakList[index].name;
+            breakList.Remove(_break);
+            ShiftTodaysProjects(index, oldProjectName);
+            onBreakStopped?.Invoke(_break, index);
+            Save();
+        }
+    }
+
     public void ChangeSchedule(int scheduleIndex)
     {
         if (scheduleIndex < todaysSchedules.Count)
@@ -194,29 +220,53 @@ public class DailySchedule : MonoBehaviour
 
     private void Save()
     {
-        SaveData saveData = new SaveData();
+        ProjectSaveData projectSaveData = new ProjectSaveData();
 
-        saveData.projectArray = new Project.SaveData[projectList.Count];
-        for (int i = 0; i < saveData.projectArray.Length; i++)
+        projectSaveData.projectArray = new Project.SaveData[projectList.Count];
+        for (int i = 0; i < projectSaveData.projectArray.Length; i++)
         {
-            saveData.projectArray[i] = projectList[i].Save();
+            projectSaveData.projectArray[i] = projectList[i].Save();
         }
 
-        SaveProjects(PROJECT_SAVE_DATA_NAME, saveData);
+        SaveProjects(PROJECT_SAVE_DATA_NAME, projectSaveData);
+
+
+        BreakSaveData breakSaveData = new BreakSaveData();
+
+        breakSaveData.breakArray = new Break.SaveData[breakList.Count];
+        for (int i = 0; i < breakSaveData.breakArray.Length; i++)
+        {
+            breakSaveData.breakArray[i] = breakList[i].Save();
+        }
+
+        SaveBreaks(breakSaveData);
     }
     private bool TryLoad()
     {
-        bool isFileLoaded = TryLoadProjects(PROJECT_SAVE_DATA_NAME, out SaveData saveData);
+        bool isFileLoaded = TryLoadProjects(PROJECT_SAVE_DATA_NAME, out ProjectSaveData projectSaveData);
 
         if (!isFileLoaded)
         {
             return false;
         }
 
-        for (int i = 0; i < saveData.projectArray.Length; i++)
+        for (int i = 0; i < projectSaveData.projectArray.Length; i++)
         {
-            projectList.Add(Project.Load(saveData.projectArray[i], this));
+            projectList.Add(Project.Load(projectSaveData.projectArray[i], this));
             onNewProjectAdded(projectList[i]);
+        }
+
+        isFileLoaded = TryLoadBreaks(out BreakSaveData breakSaveData);
+
+        if (!isFileLoaded)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < breakSaveData.breakArray.Length; i++)
+        {
+            breakList.Add(Break.Load(breakSaveData.breakArray[i], this));
+            onNewBreakAdded(breakList[i]);
         }
 
         return true;
@@ -233,7 +283,7 @@ public class DailySchedule : MonoBehaviour
 
     private void AddProjectToFile(string fileName, Project.SaveData project)
     {
-        bool isFileLoaded = TryLoadProjects(fileName, out SaveData saveData);
+        bool isFileLoaded = TryLoadProjects(fileName, out ProjectSaveData saveData);
 
         if (!isFileLoaded)
         {
@@ -244,13 +294,13 @@ public class DailySchedule : MonoBehaviour
         finishedProjectList.Add(project);
         saveData.projectArray = finishedProjectList.ToArray();
 
-        SaveProjects(fileName, saveData); ;
+        SaveProjects(fileName, saveData);
     }
 
 
-    private bool TryLoadProjects(string fileName, out SaveData saveData)
+    private bool TryLoadProjects(string fileName, out ProjectSaveData saveData)
     {
-        saveData = SaveSystem.LoadJson<SaveData>(SaveSystem.RootPath.Resources, "Saves", fileName);
+        saveData = SaveSystem.LoadJson<ProjectSaveData>(SaveSystem.RootPath.Resources, "Saves", fileName);
 
         if (saveData.projectArray == null)
         {
@@ -263,17 +313,77 @@ public class DailySchedule : MonoBehaviour
 
         return true;
     }
-    private void SaveProjects(string fileName, SaveData saveData)
+    private void SaveProjects(string fileName, ProjectSaveData saveData)
     {
         string json = JsonUtility.ToJson(saveData);
 
         SaveSystem.SaveString(json, SaveSystem.RootPath.Resources, "Saves", fileName, SaveSystem.FileType.Json, true);
     }
 
+    private bool TryLoadBreaks(out BreakSaveData saveData)
+    {
+        saveData = SaveSystem.LoadJson<BreakSaveData>(SaveSystem.RootPath.Resources, "Saves", BREAK_SAVE_DATA_NAME);
+
+        if (saveData.breakArray == null)
+        {
+            return false;
+        }
+        else if (saveData.breakArray.Length == 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+    private void SaveBreaks(BreakSaveData saveData)
+    {
+        string json = JsonUtility.ToJson(saveData);
+
+        SaveSystem.SaveString(json, SaveSystem.RootPath.Resources, "Saves", BREAK_SAVE_DATA_NAME, SaveSystem.FileType.Json, true);
+    }
+
 
 
     private Project GetProject(int projectNumber)
     {
+        TodaysProjects todaysProjects = SaveSystem.LoadJson<TodaysProjects>(SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME);
+
+        if (todaysProjects.date != DateTime.Today.Date.ToString())
+        {
+            // Change values
+
+            todaysProjects.date = DateTime.Today.Date.ToString();
+            todaysProjects.projectIndex0 = UnityEngine.Random.Range(0, projectList.Count);
+            todaysProjects.projectIndex1 = UnityEngine.Random.Range(0, projectList.Count);
+            todaysProjects.projectIndex2 = UnityEngine.Random.Range(0, projectList.Count);
+            todaysProjects.projectIndex3 = UnityEngine.Random.Range(0, projectList.Count);
+            todaysProjects.projectIndex4 = UnityEngine.Random.Range(0, projectList.Count);
+            todaysProjects.projectIndex5 = UnityEngine.Random.Range(0, projectList.Count);
+
+            SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME, true);
+        }
+
+        switch (projectNumber)
+        {
+            default:
+            case 0:
+                return projectList[todaysProjects.projectIndex0];
+            case 1:
+                return projectList[todaysProjects.projectIndex1];
+            case 2:
+                return projectList[todaysProjects.projectIndex2];
+            case 3:
+                return projectList[todaysProjects.projectIndex3];
+            case 4:
+                return projectList[todaysProjects.projectIndex4];
+            case 5:
+                return projectList[todaysProjects.projectIndex5];
+        }
+    }
+
+    private Project GetBreak(int breakNumber)
+    {
+        // TODO: Make this do breaks
         TodaysProjects todaysProjects = SaveSystem.LoadJson<TodaysProjects>(SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME);
 
         if (todaysProjects.date != DateTime.Today.Date.ToString())
@@ -363,12 +473,31 @@ public class DailySchedule : MonoBehaviour
         }
     }
 
+    private void PutBreaksIntoSchedule(Schedule.DaySchedule currentSchedule)
+    {
+        int j = 0;
+        for (int i = 0; i < currentSchedule.TimeFrames.Length; i++)
+        {
+            if (currentSchedule.TimeFrames[i].TimeFrameName.Contains("Break #"))
+            {
+                currentSchedule.TimeFrames[i].BreakName = GetProject(j).name;
+                j++;
+            }
+        }
+    }
+
 
 
     [Serializable]
-    public struct SaveData
+    public struct ProjectSaveData
     {
         public Project.SaveData[] projectArray;
+    }
+    
+    [Serializable]
+    public struct BreakSaveData
+    {
+        public Break.SaveData[] breakArray;
     }
 
     [Serializable]
@@ -397,6 +526,7 @@ public class DailySchedule : MonoBehaviour
                 public int EndTime;
                 public string TimeFrameName;
                 public string ProjectName;
+                public string BreakName;
 
 
 

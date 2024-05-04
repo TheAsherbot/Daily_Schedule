@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Unity.VisualScripting;
+
+using UnityEditor.SearchService;
+
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -22,6 +26,12 @@ public class DailyScheduleUI : MonoBehaviour
     private TextField projectNameTextField;
     private Button addNewProjectButton;
     private bool isProjectNameTextFieldFocused;
+
+    [SerializeField] private VisualTreeAsset breakTree;
+    private ScrollView breaksScrollView;
+    private TextField breakNameTextField;
+    private Button addNewBreakButton;
+    private bool isBreakNameTextFieldFocused;
 
 
     [SerializeField] private VisualTreeAsset scheduleTimeFrameTree;
@@ -56,6 +66,15 @@ public class DailyScheduleUI : MonoBehaviour
         addNewProjectButton.clicked += AddNewProjectButton_clicked;
 
 
+        breaksScrollView = root.Q<ScrollView>("breaks-scroll-view");
+        breakNameTextField = root.Q<TextField>("break-name-text-field");
+        addNewBreakButton = root.Q<Button>("add-new-break-button");
+
+        breakNameTextField.RegisterCallback<FocusInEvent>(breakNameTextField_OnFocus);
+        breakNameTextField.RegisterCallback<FocusOutEvent>(breakNameTextField_OnUnfocus);
+        addNewBreakButton.clicked += AddNewBreakButton_clicked;
+
+
         scheduleScrollView = root.Q<ScrollView>("schedule-scroll-view");
         dayOfTheWeekLabel = root.Q<Label>("day-of-the-week");
         scheduleDropDownField = root.Q<DropdownField>("schedule-drop-down-field");
@@ -71,6 +90,9 @@ public class DailyScheduleUI : MonoBehaviour
         dailySchedule.onNewProjectAdded += DailySchedule_onNewProjectAdded;
         dailySchedule.onProjectFinished += DailySchedule_onProjectFinished;
         dailySchedule.onProjectQuit += DailySchedule_onProjectQuit;
+
+        dailySchedule.onNewBreakAdded += DailySchedule_onNewBreakAdded;
+        dailySchedule.onBreakStopped += DailySchedule_onBreakStopped;
     }
 
     private void OnEnable()
@@ -94,6 +116,11 @@ public class DailyScheduleUI : MonoBehaviour
                 AddProject();
                 projectNameTextField.Focus();
             }
+            if (isBreakNameTextFieldFocused)
+            {
+                AddBreak();
+                breakNameTextField.Focus();
+            }
         }
     }
 
@@ -103,6 +130,15 @@ public class DailyScheduleUI : MonoBehaviour
         isProjectNameTextFieldFocused = true;
     }
     private void projectNameTextField_OnUnfocus(FocusOutEvent evt)
+    {
+        isProjectNameTextFieldFocused = false;
+    }
+
+    private void breakNameTextField_OnFocus(FocusInEvent evt)
+    {
+        isProjectNameTextFieldFocused = true;
+    }
+    private void breakNameTextField_OnUnfocus(FocusOutEvent evt)
     {
         isProjectNameTextFieldFocused = false;
     }
@@ -119,6 +155,11 @@ public class DailyScheduleUI : MonoBehaviour
     private void AddNewProjectButton_clicked()
     {
         AddProject();
+    }
+    
+    private void AddNewBreakButton_clicked()
+    {
+        AddBreak();
     }
 
 
@@ -152,6 +193,22 @@ public class DailyScheduleUI : MonoBehaviour
         RefreshProjects();
     }
 
+    private void DailySchedule_onBreakStopped(Break _break, int index)
+    {
+        RemoveBreak(index);
+        UpdateSchedule();
+        RefreshBreaks();
+    }
+    private void DailySchedule_onNewBreakAdded(Break _break)
+    {
+        VisualElement breakRootElement = breakTree.CloneTree();
+        breakRootElement.Q<Label>("break-name-label").text = _break.name;
+        breakRootElement.Q<VisualElement>("break").style.backgroundColor = breaksScrollView.childCount % 2 == 0 ? Color.HSVToRGB(0, 0, 0.65f) : Color.HSVToRGB(0, 0, 0.55f);
+        breaksScrollView.Add(breakRootElement);
+
+        breakRootElement.Q<Button>("stop-button").clicked += _break.Stop;
+    }
+
 
     private void RefreshTodaysSchedules()
     {
@@ -169,6 +226,14 @@ public class DailyScheduleUI : MonoBehaviour
         for (int i = 0; i < projectsScrollView.childCount; i++)
         {
             projectsScrollView.ElementAt(i).Q<VisualElement>("project").style.backgroundColor = i % 2 == 0 ? Color.HSVToRGB(0, 0, 0.65f) : Color.HSVToRGB(0, 0, 0.55f);
+        }
+    }
+
+    private void RefreshBreaks()
+    {
+        for (int i = 0; i < breaksScrollView.childCount; i++)
+        {
+            breaksScrollView.ElementAt(i).Q<VisualElement>("break").style.backgroundColor = i % 2 == 0 ? Color.HSVToRGB(0, 0, 0.65f) : Color.HSVToRGB(0, 0, 0.55f);
         }
     }
 
@@ -232,6 +297,24 @@ public class DailyScheduleUI : MonoBehaviour
     private void RemoveProject(int index)
     {
         projectsScrollView.RemoveAt(index);
+    }
+    
+
+    private void AddBreak()
+    {
+        if (breakNameTextField.value == "" || breakNameTextField.value == "null" || breakNameTextField.value == null)
+        {
+            return;
+        }
+
+        Break _break = new Break(breakNameTextField.value, dailySchedule);
+        dailySchedule.AddNewBreak(_break);
+        breakNameTextField.value = "";
+    }
+
+    private void RemoveBreak(int index)
+    {
+        breaksScrollView.RemoveAt(index);
     }
 
 
