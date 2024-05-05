@@ -5,7 +5,6 @@ using System.Linq;
 using TheAshBot;
 
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class DailySchedule : MonoBehaviour
 {
@@ -14,7 +13,8 @@ public class DailySchedule : MonoBehaviour
     private const string BREAK_SAVE_DATA_NAME = "BreakSaveData";
     private const string FINISHED_PROJECT_SAVE_DATA_NAME = "FinishedProjectSaveData";
     private const string QUIT_PROJECT_SAVE_DATA_NAME = "QuitProjectSaveData";
-    private const string TODAYS_PROJECT_SAVE_DATA_NAME = "TodaysProjectSaveData";
+    private const string TODAYS_SCHEDULE_SAVE_DATA_NAME = "TodaysScheduleSaveData";
+    private const string SCHEDULE_SAVE_DATA_NAME = "ScheduleSaveData";
 
 
     public event Action<Project> onNewProjectAdded;
@@ -39,6 +39,7 @@ public class DailySchedule : MonoBehaviour
     private void Awake()
     {
         onCurrentScheduleChanged += PutProjectsIntoSchedule;
+        onCurrentScheduleChanged += PutBreaksIntoSchedule;
     }
 
     private void Start()
@@ -76,15 +77,6 @@ public class DailySchedule : MonoBehaviour
 
         currentSchedule = todaysSchedules[0];
         onCurrentScheduleChanged?.Invoke(currentSchedule);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.KeypadEnter))
-        {
-            GetProject(1);
-            Save();
-        }
     }
 
 
@@ -174,7 +166,7 @@ public class DailySchedule : MonoBehaviour
 
     public void RerollTimeFrame(int timeFrame)
     {
-        TodaysProjects todaysProjects = SaveSystem.LoadJson<TodaysProjects>(SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME);
+        TodaysSchedule todaysProjects = SaveSystem.LoadJson<TodaysSchedule>(SaveSystem.RootPath.Resources, "Saves", TODAYS_SCHEDULE_SAVE_DATA_NAME);
 
         if (currentSchedule.TimeFrames[timeFrame].TimeFrameName.Contains("Project #"))
         {
@@ -212,8 +204,44 @@ public class DailySchedule : MonoBehaviour
                 }
             }
         }
+        else if (currentSchedule.TimeFrames[timeFrame].TimeFrameName.Contains("Break #"))
+        {
+            int breakNumber = 0;
+            for (int i = 0; i < currentSchedule.TimeFrames.Length; i++)
+            {
+                if (currentSchedule.TimeFrames[i].TimeFrameName.Contains("Break #"))
+                {
+                    if (i == timeFrame)
+                    {
+                        switch (breakNumber)
+                        {
+                            case 0:
+                                todaysProjects.breakIndex0 = UnityEngine.Random.Range(0, breakList.Count);
+                                break;
+                            case 1:
+                                todaysProjects.breakIndex1 = UnityEngine.Random.Range(0, breakList.Count);
+                                break;
+                            case 2:
+                                todaysProjects.breakIndex2 = UnityEngine.Random.Range(0, breakList.Count);
+                                break;
+                            case 3:
+                                todaysProjects.breakIndex3 = UnityEngine.Random.Range(0, breakList.Count);
+                                break;
+                            case 4:
+                                todaysProjects.breakIndex4 = UnityEngine.Random.Range(0, breakList.Count);
+                                break;
+                            case 5:
+                                todaysProjects.breakIndex5 = UnityEngine.Random.Range(0, breakList.Count);
+                                break;
+                        }
+                        break;
+                    }
+                    breakNumber++;
+                }
+            }
+        }
 
-        SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME, true);
+        SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_SCHEDULE_SAVE_DATA_NAME, true);
 
         onCurrentScheduleChanged?.Invoke(currentSchedule);
     }
@@ -346,21 +374,11 @@ public class DailySchedule : MonoBehaviour
 
     private Project GetProject(int projectNumber)
     {
-        TodaysProjects todaysProjects = SaveSystem.LoadJson<TodaysProjects>(SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME);
+        TodaysSchedule todaysProjects = SaveSystem.LoadJson<TodaysSchedule>(SaveSystem.RootPath.Resources, "Saves", TODAYS_SCHEDULE_SAVE_DATA_NAME);
 
         if (todaysProjects.date != DateTime.Today.Date.ToString())
         {
-            // Change values
-
-            todaysProjects.date = DateTime.Today.Date.ToString();
-            todaysProjects.projectIndex0 = UnityEngine.Random.Range(0, projectList.Count);
-            todaysProjects.projectIndex1 = UnityEngine.Random.Range(0, projectList.Count);
-            todaysProjects.projectIndex2 = UnityEngine.Random.Range(0, projectList.Count);
-            todaysProjects.projectIndex3 = UnityEngine.Random.Range(0, projectList.Count);
-            todaysProjects.projectIndex4 = UnityEngine.Random.Range(0, projectList.Count);
-            todaysProjects.projectIndex5 = UnityEngine.Random.Range(0, projectList.Count);
-
-            SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME, true);
+            RandomizeBreaksAndProjects();
         }
 
         switch (projectNumber)
@@ -381,46 +399,61 @@ public class DailySchedule : MonoBehaviour
         }
     }
 
-    private Project GetBreak(int breakNumber)
+    private Break GetBreak(int breakNumber)
     {
-        // TODO: Make this do breaks
-        TodaysProjects todaysProjects = SaveSystem.LoadJson<TodaysProjects>(SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME);
+        TodaysSchedule todaysProjects = SaveSystem.LoadJson<TodaysSchedule>(SaveSystem.RootPath.Resources, "Saves", TODAYS_SCHEDULE_SAVE_DATA_NAME);
 
         if (todaysProjects.date != DateTime.Today.Date.ToString())
         {
-            // Change values
-
-            todaysProjects.date = DateTime.Today.Date.ToString();
-            todaysProjects.projectIndex0 = UnityEngine.Random.Range(0, projectList.Count);
-            todaysProjects.projectIndex1 = UnityEngine.Random.Range(0, projectList.Count);
-            todaysProjects.projectIndex2 = UnityEngine.Random.Range(0, projectList.Count);
-            todaysProjects.projectIndex3 = UnityEngine.Random.Range(0, projectList.Count);
-            todaysProjects.projectIndex4 = UnityEngine.Random.Range(0, projectList.Count);
-            todaysProjects.projectIndex5 = UnityEngine.Random.Range(0, projectList.Count);
-
-            SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME, true);
+            RandomizeBreaksAndProjects();
         }
 
-        switch (projectNumber)
+        switch (breakNumber)
         {
             default:
             case 0:
-                return projectList[todaysProjects.projectIndex0];
+                return breakList[todaysProjects.breakIndex0];
             case 1:
-                return projectList[todaysProjects.projectIndex1];
+                return breakList[todaysProjects.breakIndex1];
             case 2:
-                return projectList[todaysProjects.projectIndex2];
+                return breakList[todaysProjects.breakIndex2];
             case 3:
-                return projectList[todaysProjects.projectIndex3];
+                return breakList[todaysProjects.breakIndex3];
             case 4:
-                return projectList[todaysProjects.projectIndex4];
+                return breakList[todaysProjects.breakIndex4];
             case 5:
-                return projectList[todaysProjects.projectIndex5];
+                return breakList[todaysProjects.breakIndex5];
         }
     }
+
+
+    private void RandomizeBreaksAndProjects()
+    {
+        TodaysSchedule todaysProjects = new TodaysSchedule();
+
+        todaysProjects.date = DateTime.Today.Date.ToString();
+        todaysProjects.projectIndex0 = UnityEngine.Random.Range(0, projectList.Count);
+        todaysProjects.projectIndex1 = UnityEngine.Random.Range(0, projectList.Count);
+        todaysProjects.projectIndex2 = UnityEngine.Random.Range(0, projectList.Count);
+        todaysProjects.projectIndex3 = UnityEngine.Random.Range(0, projectList.Count);
+        todaysProjects.projectIndex4 = UnityEngine.Random.Range(0, projectList.Count);
+        todaysProjects.projectIndex5 = UnityEngine.Random.Range(0, projectList.Count);
+
+        todaysProjects.date = DateTime.Today.Date.ToString();
+        todaysProjects.breakIndex0 = UnityEngine.Random.Range(0, breakList.Count);
+        todaysProjects.breakIndex1 = UnityEngine.Random.Range(0, breakList.Count);
+        todaysProjects.breakIndex2 = UnityEngine.Random.Range(0, breakList.Count);
+        todaysProjects.breakIndex3 = UnityEngine.Random.Range(0, breakList.Count);
+        todaysProjects.breakIndex4 = UnityEngine.Random.Range(0, breakList.Count);
+        todaysProjects.breakIndex5 = UnityEngine.Random.Range(0, breakList.Count);
+
+        SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_SCHEDULE_SAVE_DATA_NAME, true);
+    }
+
+
     private void ShiftTodaysProjects(int removedProjectIndex, string oldProjectName)
     {
-        TodaysProjects todaysProjects = SaveSystem.LoadJson<TodaysProjects>(SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME);
+        TodaysSchedule todaysProjects = SaveSystem.LoadJson<TodaysSchedule>(SaveSystem.RootPath.Resources, "Saves", TODAYS_SCHEDULE_SAVE_DATA_NAME);
 
         todaysProjects.date = DateTime.Today.Date.ToString();
 
@@ -431,7 +464,7 @@ public class DailySchedule : MonoBehaviour
         ShiftIfNecessaire(ref todaysProjects.projectIndex4);
         ShiftIfNecessaire(ref todaysProjects.projectIndex5);
 
-        SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_PROJECT_SAVE_DATA_NAME, true);
+        SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_SCHEDULE_SAVE_DATA_NAME, true);
 
         void ShiftIfNecessaire(ref int projectIndex)
         {
@@ -455,7 +488,7 @@ public class DailySchedule : MonoBehaviour
 
     private Schedule LoadSchedules()
     {
-        Schedule schedule = SaveSystem.LoadJson<Schedule>(SaveSystem.RootPath.Resources, "Saves", "ScheduleSaveData");
+        Schedule schedule = SaveSystem.LoadJson<Schedule>(SaveSystem.RootPath.Resources, "Saves", SCHEDULE_SAVE_DATA_NAME);
 
         return schedule;
     }
@@ -480,7 +513,7 @@ public class DailySchedule : MonoBehaviour
         {
             if (currentSchedule.TimeFrames[i].TimeFrameName.Contains("Break #"))
             {
-                currentSchedule.TimeFrames[i].BreakName = GetProject(j).name;
+                currentSchedule.TimeFrames[i].BreakName = GetBreak(j).name;
                 j++;
             }
         }
@@ -501,83 +534,7 @@ public class DailySchedule : MonoBehaviour
     }
 
     [Serializable]
-    public struct Schedule
-    {
-
-        public DaySchedule[] SundaySchedule;
-        public DaySchedule[] MondaySchedule;
-        public DaySchedule[] TuesdaySchedule;
-        public DaySchedule[] WednesdaySchedule;
-        public DaySchedule[] ThursdaySchedule;
-        public DaySchedule[] FridaySchedule;
-        public DaySchedule[] SaturdaySchedule;
-
-        [Serializable]
-        public struct DaySchedule
-        {
-            public string name;
-
-            public TimeFrame[] TimeFrames;
-
-            [Serializable]
-            public struct TimeFrame
-            {
-                public int StartTime;
-                public int EndTime;
-                public string TimeFrameName;
-                public string ProjectName;
-                public string BreakName;
-
-
-
-                public static bool operator ==(TimeFrame timeFrame1, TimeFrame timeFrame2)
-                {
-                    if (timeFrame1.StartTime == timeFrame2.StartTime && timeFrame1.EndTime == timeFrame2.EndTime && timeFrame1.TimeFrameName == timeFrame2.TimeFrameName && timeFrame1.ProjectName == timeFrame2.ProjectName)
-                    {
-                        return true;
-                    }
-                    return false;
-                }
-                public static bool operator !=(TimeFrame timeFrame1, TimeFrame timeFrame2)
-                {
-                    if (timeFrame1.StartTime == timeFrame2.StartTime && timeFrame1.EndTime == timeFrame2.EndTime && timeFrame1.TimeFrameName == timeFrame2.TimeFrameName && timeFrame1.ProjectName == timeFrame2.ProjectName)
-                    {
-                        return false;
-                    }
-                    return true;
-                }
-
-                public override bool Equals(object obj)
-                {
-                    if (!(obj is TimeFrame timeFrame))
-                    {
-                        return false;
-                    }
-
-                    if (timeFrame.StartTime == StartTime && timeFrame.EndTime == EndTime && timeFrame.TimeFrameName == TimeFrameName && timeFrame.ProjectName == ProjectName)
-                    {
-                        return true;
-                    }
-
-                    return false;
-                }
-            }
-
-        }
-
-
-        public override string ToString()
-        {
-            string json = JsonUtility.ToJson(this);
-            json = json.Replace("{", "{\n").
-                Replace("[", "[\n").
-                Replace(",", ",\n");
-            return json;
-        }
-    }
-
-    [Serializable]
-    public struct TodaysProjects
+    public struct TodaysSchedule
     {
         public string date;
 
@@ -587,6 +544,13 @@ public class DailySchedule : MonoBehaviour
         public int projectIndex3;
         public int projectIndex4;
         public int projectIndex5;
+
+        public int breakIndex0;
+        public int breakIndex1;
+        public int breakIndex2;
+        public int breakIndex3;
+        public int breakIndex4;
+        public int breakIndex5;
     }
 
 }

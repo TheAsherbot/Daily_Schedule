@@ -2,10 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Unity.VisualScripting;
-
-using UnityEditor.SearchService;
-
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -80,7 +76,7 @@ public class DailyScheduleUI : MonoBehaviour
         scheduleDropDownField = root.Q<DropdownField>("schedule-drop-down-field");
 
         dayOfTheWeekLabel.text = DateTime.Today.DayOfWeek.ToString();
-        List<DailySchedule.Schedule.DaySchedule> todaysSchedules = dailySchedule.GetTodaysSchedules();
+        List<Schedule.DaySchedule> todaysSchedules = dailySchedule.GetTodaysSchedules();
 
         scheduleDropDownField.choices = new List<string>();
 
@@ -148,7 +144,7 @@ public class DailyScheduleUI : MonoBehaviour
     private void ScheduleDropDownField_OnValueChanged(ChangeEvent<string> eventCallback)
     {
         dailySchedule.SetCurrentSchedule(dailySchedule.GetTodaysSchedules()[scheduleDropDownField.choices.ToList().FindIndex((string value) => { return value == eventCallback.newValue; })]);
-        List<DailySchedule.Schedule.DaySchedule> todaysSchedules = dailySchedule.GetTodaysSchedules();
+        List<Schedule.DaySchedule> todaysSchedules = dailySchedule.GetTodaysSchedules();
         scheduleDropDownField.SetValueWithoutNotify(todaysSchedules[scheduleDropDownField.choices.ToList().FindIndex((string value) => { return value == eventCallback.newValue; })].name);
     }
 
@@ -164,7 +160,7 @@ public class DailyScheduleUI : MonoBehaviour
 
 
 
-    private void DailySchedule_onCurrentScheduleChanged(DailySchedule.Schedule.DaySchedule currentSchedule)
+    private void DailySchedule_onCurrentScheduleChanged(Schedule.DaySchedule currentSchedule)
     {
         UpdateSchedule();
         RefreshTodaysSchedules();
@@ -212,7 +208,7 @@ public class DailyScheduleUI : MonoBehaviour
 
     private void RefreshTodaysSchedules()
     {
-        List<DailySchedule.Schedule.DaySchedule> todaysSchedules = dailySchedule.GetTodaysSchedules();
+        List<Schedule.DaySchedule> todaysSchedules = dailySchedule.GetTodaysSchedules();
         
         for (int i = 0; i < todaysSchedules.Count; i++)
         {
@@ -240,7 +236,7 @@ public class DailyScheduleUI : MonoBehaviour
     private void UpdateSchedule()
     {
         scheduleScrollView.Clear();
-        DailySchedule.Schedule.DaySchedule todaysSchedule = dailySchedule.GetCurrentSchedule();
+        Schedule.DaySchedule todaysSchedule = dailySchedule.GetCurrentSchedule();
 
         for (int i = 0; i < todaysSchedule.TimeFrames.Length; i++)
         {
@@ -256,13 +252,17 @@ public class DailyScheduleUI : MonoBehaviour
             timeFrameVisualElement.Q<Label>("time-frame-name-label").text = todaysSchedule.TimeFrames[i].TimeFrameName;
             if (todaysSchedule.TimeFrames[i].ProjectName != null && todaysSchedule.TimeFrames[i].ProjectName != " ")
             {
-                timeFrameVisualElement.Q<Label>("project-name-label").text = todaysSchedule.TimeFrames[i].ProjectName;
+                timeFrameVisualElement.Q<Label>("time-frame-task-name-label").text = todaysSchedule.TimeFrames[i].ProjectName;
+            }
+            else if (todaysSchedule.TimeFrames[i].BreakName != null && todaysSchedule.TimeFrames[i].BreakName != " ")
+            {
+                timeFrameVisualElement.Q<Label>("time-frame-task-name-label").text = todaysSchedule.TimeFrames[i].BreakName;
             }
             else
             {
                 timeFrameVisualElement.Q<VisualElement>("bottom").style.display = DisplayStyle.None;
             }
-            DailySchedule.Schedule.DaySchedule.TimeFrame timeFrame = todaysSchedule.TimeFrames[i];
+            Schedule.DaySchedule.TimeFrame timeFrame = todaysSchedule.TimeFrames[i];
             timeFrameVisualElement.Q<Button>("reroll-button").clicked += () =>
             {
                 int timeFrameNumber = 0;

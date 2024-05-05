@@ -6,8 +6,8 @@
             <ui:Label tabindex="-1" text="Project #4" parse-escape-sequences="true" display-tooltip-when-elided="true" name="time-frame-name-label" class="schedule-label-style" style="max-width: 580px; min-width: 53px; white-space: normal;" />
         </ui:VisualElement>
         <ui:VisualElement name="bottom" style="flex-grow: 1; flex-direction: row; align-items: center;">
-            <ui:Label tabindex="-1" text="Dots" parse-escape-sequences="true" display-tooltip-when-elided="true" name="project-name-label" class="schedule-label-style" style="white-space: normal; height: auto; min-height: 50px;" />
-            <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="reroll-button" class="image-button-style button-style" style="background-image: url(&apos;project://database/Assets/Sprites/Dice.png?fileID=2800000&amp;guid=5512a593158929847a5e0644e595be3e&amp;type=3#Dice&apos;);" />
+            <ui:Label tabindex="-1" text="Dots" parse-escape-sequences="true" display-tooltip-when-elided="true" name="time-frame-task-name-label" class="schedule-label-style" style="white-space: normal; height: auto; min-height: 50px;" />
+            <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="reroll-button" class="image-button-style button-style" style="background-image: url(&quot;project://database/Assets/Sprites/Dice.png?fileID=2800000&amp;guid=5512a593158929847a5e0644e595be3e&amp;type=3#Dice&quot;);" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
