@@ -133,6 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 516196576}
   - component: {fileID: 516196575}
+  - component: {fileID: 516196577}
   m_Layer: 0
   m_Name: DailySchedule
   m_TagString: Untagged
@@ -167,6 +168,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &516196577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 516196574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c355c90b7b135d04f8be78e387ee8532, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Item:
+    rid: 7806206140167487488
+  m_Item2:
+    rid: 7806206140167487489
+  m_MyApple:
+    m_Data: 1
+    m_Description: Ripe
+  references:
+    version: 2
+    RefIds:
+    - rid: 7806206140167487488
+      type: {class: Test/Apple, ns: , asm: Assembly-CSharp}
+      data:
+        m_Data: 1
+        m_Description: Ripe
+    - rid: 7806206140167487489
+      type: {class: Test/Orange, ns: , asm: Assembly-CSharp}
+      data:
+        m_Data: 1
+        m_IsRound: 1
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
