@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 using UnityEngine.UIElements;
 
 public class TabbedMenuController
@@ -35,7 +37,15 @@ public class TabbedMenuController
         Label clickedTab = clickEvent.currentTarget as Label;
         if (!IsTabCurrentlySelected(clickedTab))
         {
-            GetAllTabs().Where((tab) => tab != clickedTab && IsTabCurrentlySelected(tab)).ForEach(UnselectTab);
+            List<Label> List_LabelsForTabs = GetAllTabs().ToList();
+            for (int i = 0; i < List_LabelsForTabs.Count; i++)
+            {
+                if (List_LabelsForTabs[i] != clickedTab && IsTabCurrentlySelected(List_LabelsForTabs[i]))
+                {
+                    UnselectTab(List_LabelsForTabs[i]);
+                }
+            }
+
             SelectTab(clickedTab);
         }
     }

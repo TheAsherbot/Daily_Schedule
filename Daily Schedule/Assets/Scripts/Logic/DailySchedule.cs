@@ -17,14 +17,14 @@ public class DailySchedule : MonoBehaviour
     private const string SCHEDULE_SAVE_DATA_NAME = "ScheduleSaveData";
 
 
-    public event Action<Project> onNewProjectAdded;
-    public event Action<Project, int> onProjectFinished;
-    public event Action<Project, int> onProjectQuit;
+    public event Action<Project> OnNewProjectAdded;
+    public event Action<Project, int> OnProjectFinished;
+    public event Action<Project, int> OnProjectQuit;
 
-    public event Action<Break> onNewBreakAdded;
-    public event Action<Break, int> onBreakStopped;
+    public event Action<Break> OnNewBreakAdded;
+    public event Action<Break, int> OnBreakStopped;
 
-    public event Action<Schedule.DaySchedule> onCurrentScheduleChanged;
+    public event Action<Schedule.DaySchedule> OnCurrentScheduleChanged;
 
 
 
@@ -38,8 +38,8 @@ public class DailySchedule : MonoBehaviour
 
     private void Awake()
     {
-        onCurrentScheduleChanged += PutProjectsIntoSchedule;
-        onCurrentScheduleChanged += PutBreaksIntoSchedule;
+        OnCurrentScheduleChanged += PutProjectsIntoSchedule;
+        OnCurrentScheduleChanged += PutBreaksIntoSchedule;
     }
 
     private void Start()
@@ -76,17 +76,20 @@ public class DailySchedule : MonoBehaviour
         }
 
         currentSchedule = todaysSchedules[0];
-        onCurrentScheduleChanged?.Invoke(currentSchedule);
+        OnCurrentScheduleChanged?.Invoke(currentSchedule);
     }
 
 
 
     public void AddNewProject(Project project)
     {
-        if (projectList.Contains(project)) return;
+        if (projectList.Contains(project))
+        {
+            return;
+        }
 
         projectList.Add(project);
-        onNewProjectAdded?.Invoke(project);
+        OnNewProjectAdded?.Invoke(project);
         Save();
     }
     public void FinishProject(Project project)
@@ -97,7 +100,7 @@ public class DailySchedule : MonoBehaviour
             string oldProjectName = projectList[index].name;
             projectList.Remove(project);
             ShiftTodaysProjects(index, oldProjectName);
-            onProjectFinished?.Invoke(project, index);
+            OnProjectFinished?.Invoke(project, index);
             AddToFinishedProjects(project);
             Save();
         }
@@ -110,7 +113,7 @@ public class DailySchedule : MonoBehaviour
             string oldProjectName = projectList[index].name;
             projectList.Remove(project);
             ShiftTodaysProjects(index, oldProjectName);
-            onProjectQuit?.Invoke(project, index);
+            OnProjectQuit?.Invoke(project, index);
             AddToQuitProjects(project);
             Save();
         }
@@ -118,10 +121,13 @@ public class DailySchedule : MonoBehaviour
 
     public void AddNewBreak(Break _break)
     {
-        if (breakList.Contains(_break)) return;
+        if (breakList.Contains(_break))
+        {
+            return;
+        }
 
         breakList.Add(_break);
-        onNewBreakAdded?.Invoke(_break);
+        OnNewBreakAdded?.Invoke(_break);
         Save();
     }
     public void StopBreak(Break _break)
@@ -132,7 +138,7 @@ public class DailySchedule : MonoBehaviour
             string oldProjectName = breakList[index].name;
             breakList.Remove(_break);
             ShiftTodaysProjects(index, oldProjectName);
-            onBreakStopped?.Invoke(_break, index);
+            OnBreakStopped?.Invoke(_break, index);
             Save();
         }
     }
@@ -142,7 +148,7 @@ public class DailySchedule : MonoBehaviour
         if (scheduleIndex < todaysSchedules.Count)
         {
             currentSchedule = todaysSchedules[scheduleIndex];
-            onCurrentScheduleChanged?.Invoke(currentSchedule);
+            OnCurrentScheduleChanged?.Invoke(currentSchedule);
         }
     }
 
@@ -161,7 +167,7 @@ public class DailySchedule : MonoBehaviour
     public void SetCurrentSchedule(Schedule.DaySchedule daySchedule)
     {
         currentSchedule = daySchedule;
-        onCurrentScheduleChanged?.Invoke(currentSchedule);
+        OnCurrentScheduleChanged?.Invoke(currentSchedule);
     }
 
     public void RerollTimeFrame(int timeFrame)
@@ -243,7 +249,7 @@ public class DailySchedule : MonoBehaviour
 
         SaveSystem.SaveJson(todaysProjects, SaveSystem.RootPath.Resources, "Saves", TODAYS_SCHEDULE_SAVE_DATA_NAME, true);
 
-        onCurrentScheduleChanged?.Invoke(currentSchedule);
+        OnCurrentScheduleChanged?.Invoke(currentSchedule);
     }
 
     private void Save()
@@ -281,7 +287,7 @@ public class DailySchedule : MonoBehaviour
         for (int i = 0; i < projectSaveData.projectArray.Length; i++)
         {
             projectList.Add(Project.Load(projectSaveData.projectArray[i], this));
-            onNewProjectAdded(projectList[i]);
+            OnNewProjectAdded(projectList[i]);
         }
 
         isFileLoaded = TryLoadBreaks(out BreakSaveData breakSaveData);
@@ -294,7 +300,7 @@ public class DailySchedule : MonoBehaviour
         for (int i = 0; i < breakSaveData.breakArray.Length; i++)
         {
             breakList.Add(Break.Load(breakSaveData.breakArray[i], this));
-            onNewBreakAdded(breakList[i]);
+            OnNewBreakAdded(breakList[i]);
         }
 
         return true;

@@ -57,8 +57,8 @@ public class DailyScheduleUI : MonoBehaviour
         projectNameTextField = root.Q<TextField>("project-name-text-field");
         addNewProjectButton = root.Q<Button>("add-new-project-button");
 
-        projectNameTextField.RegisterCallback<FocusInEvent>(projectNameTextField_OnFocus);
-        projectNameTextField.RegisterCallback<FocusOutEvent>(projectNameTextField_OnUnfocus);
+        projectNameTextField.RegisterCallback<FocusInEvent>(ProjectNameTextField_OnFocus);
+        projectNameTextField.RegisterCallback<FocusOutEvent>(ProjectNameTextField_OnUnfocus);
         addNewProjectButton.clicked += AddNewProjectButton_clicked;
 
 
@@ -66,8 +66,8 @@ public class DailyScheduleUI : MonoBehaviour
         breakNameTextField = root.Q<TextField>("break-name-text-field");
         addNewBreakButton = root.Q<Button>("add-new-break-button");
 
-        breakNameTextField.RegisterCallback<FocusInEvent>(breakNameTextField_OnFocus);
-        breakNameTextField.RegisterCallback<FocusOutEvent>(breakNameTextField_OnUnfocus);
+        breakNameTextField.RegisterCallback<FocusInEvent>(BreakNameTextField_OnFocus);
+        breakNameTextField.RegisterCallback<FocusOutEvent>(BreakNameTextField_OnUnfocus);
         addNewBreakButton.clicked += AddNewBreakButton_clicked;
 
 
@@ -83,17 +83,17 @@ public class DailyScheduleUI : MonoBehaviour
         scheduleDropDownField.RegisterValueChangedCallback(ScheduleDropDownField_OnValueChanged);
 
 
-        dailySchedule.onNewProjectAdded += DailySchedule_onNewProjectAdded;
-        dailySchedule.onProjectFinished += DailySchedule_onProjectFinished;
-        dailySchedule.onProjectQuit += DailySchedule_onProjectQuit;
+        dailySchedule.OnNewProjectAdded += DailySchedule_onNewProjectAdded;
+        dailySchedule.OnProjectFinished += DailySchedule_onProjectFinished;
+        dailySchedule.OnProjectQuit += DailySchedule_onProjectQuit;
 
-        dailySchedule.onNewBreakAdded += DailySchedule_onNewBreakAdded;
-        dailySchedule.onBreakStopped += DailySchedule_onBreakStopped;
+        dailySchedule.OnNewBreakAdded += DailySchedule_onNewBreakAdded;
+        dailySchedule.OnBreakStopped += DailySchedule_onBreakStopped;
     }
 
     private void OnEnable()
     {
-        dailySchedule.onCurrentScheduleChanged += DailySchedule_onCurrentScheduleChanged;
+        dailySchedule.OnCurrentScheduleChanged += DailySchedule_onCurrentScheduleChanged;
     }
 
     private void Start()
@@ -121,20 +121,20 @@ public class DailyScheduleUI : MonoBehaviour
     }
 
 
-    private void projectNameTextField_OnFocus(FocusInEvent evt)
+    private void ProjectNameTextField_OnFocus(FocusInEvent evt)
     {
         isProjectNameTextFieldFocused = true;
     }
-    private void projectNameTextField_OnUnfocus(FocusOutEvent evt)
+    private void ProjectNameTextField_OnUnfocus(FocusOutEvent evt)
     {
         isProjectNameTextFieldFocused = false;
     }
 
-    private void breakNameTextField_OnFocus(FocusInEvent evt)
+    private void BreakNameTextField_OnFocus(FocusInEvent evt)
     {
         isProjectNameTextFieldFocused = true;
     }
-    private void breakNameTextField_OnUnfocus(FocusOutEvent evt)
+    private void BreakNameTextField_OnUnfocus(FocusOutEvent evt)
     {
         isProjectNameTextFieldFocused = false;
     }
@@ -284,7 +284,7 @@ public class DailyScheduleUI : MonoBehaviour
 
     private void AddProject()
     {
-        if (projectNameTextField.value == "" || projectNameTextField.value == "null" || projectNameTextField.value == null)
+        if (projectNameTextField.value == "" || projectNameTextField.value == "null" || projectNameTextField.value == null || projectNameTextField.value == "Project Name")
         {
             return;
         }

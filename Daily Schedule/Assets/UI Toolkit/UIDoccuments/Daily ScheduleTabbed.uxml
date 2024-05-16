@@ -3,12 +3,19 @@
     <ui:VisualElement name="Root" style="flex-grow: 1; flex-direction: column;">
         <TimeField />
         <ui:VisualElement name="Tabs" style="flex-grow: 0; flex-direction: row;">
+            <ui:Label tabindex="-1" text="Projects" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ProjectTab" class="Tab CurrentlySelectedTab" />
             <ui:Label tabindex="-1" text="Breaks" parse-escape-sequences="true" display-tooltip-when-elided="true" name="BreakTab" class="Tab" />
-            <ui:Label tabindex="-1" text="Projects" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ProjectTab" class="Tab" />
-            <ui:Label tabindex="-1" text="Schedule Maker" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ScheduleMakerTab" class="Tab CurrentlySelectedTab" />
+            <ui:Label tabindex="-1" text="Schedule Maker" parse-escape-sequences="true" display-tooltip-when-elided="true" name="MakerScheduleTab" class="Tab" />
             <ui:Label tabindex="-1" text="Schedule" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ScheduleTab" class="Tab" />
         </ui:VisualElement>
         <ui:VisualElement name="Contents" style="flex-grow: 1;">
+            <ui:GroupBox name="ProjectContent" class="Content">
+                <ui:VisualElement name="toolbar-visual-element" class="toolbar-visual-element-style" style="margin-top: 10px; background-color: rgb(242, 242, 242); min-height: 50px; flex-direction: row;">
+                    <ui:TextField picking-mode="Ignore" value="Project Name" name="project-name-text-field" style="font-size: 22px; flex-grow: 1; max-width: initial; min-width: initial;" />
+                    <ui:Button text="Add New Project" parse-escape-sequences="true" display-tooltip-when-elided="true" name="add-new-project-button" class="button-style" style="font-size: 25px; flex-basis: initial;" />
+                </ui:VisualElement>
+                <ui:ScrollView name="projects-scroll-view" class="scroll-view-style" style="margin-top: 1px;" />
+            </ui:GroupBox>
             <ui:GroupBox name="BreakContent" class="Content UnselectedContent">
                 <ui:VisualElement name="toolbar-visual-element" class="toolbar-visual-element-style" style="margin-top: 10px; background-color: rgb(242, 242, 242); min-height: 50px; flex-direction: row;">
                     <ui:TextField picking-mode="Ignore" value="Break Name" name="break-name-text-field" style="font-size: 22px; flex-grow: 1; max-width: initial; min-width: initial;" />
@@ -16,15 +23,8 @@
                 </ui:VisualElement>
                 <ui:ScrollView name="breaks-scroll-view" class="scroll-view-style" style="margin-top: 1px;" />
             </ui:GroupBox>
-            <ui:GroupBox name="ProjectContent" class="Content UnselectedContent">
-                <ui:VisualElement name="toolbar-visual-element" class="toolbar-visual-element-style" style="margin-top: 10px; background-color: rgb(242, 242, 242); min-height: 50px; flex-direction: row;">
-                    <ui:TextField picking-mode="Ignore" value="Project Name" name="project-name-text-field" style="font-size: 22px; flex-grow: 1; max-width: initial; min-width: initial;" />
-                    <ui:Button text="Add New Project" parse-escape-sequences="true" display-tooltip-when-elided="true" name="add-new-project-button" class="button-style" style="font-size: 25px; flex-basis: initial;" />
-                </ui:VisualElement>
-                <ui:ScrollView name="projects-scroll-view" class="scroll-view-style" style="margin-top: 1px;" />
-            </ui:GroupBox>
-            <ui:GroupBox name="ScheduleMakerContent" class="Content">
-                <ui:ScrollView name="schedule-scroll-view" class="scroll-view-style" style="margin-top: 0;">
+            <ui:GroupBox name="MakerScheduleContent" class="Content UnselectedContent">
+                <ui:ScrollView name="schedule-maker-scroll-view" class="scroll-view-style" style="margin-top: 0;">
                     <ui:VisualElement name="toolbar-visual-element" class="toolbar-visual-element-style" style="margin-top: 0; background-color: rgb(242, 242, 242); min-height: 50px; flex-direction: column; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-shrink: 0; max-height: 100%;">
                         <ui:VisualElement name="name-group" style="flex-grow: 1; flex-direction: row; width: 100%;">
                             <ui:TextField picking-mode="Ignore" value="Schedule Name" name="schedule-name-text-field" style="font-size: 22px; flex-grow: 1; max-width: initial; min-width: initial;" />
